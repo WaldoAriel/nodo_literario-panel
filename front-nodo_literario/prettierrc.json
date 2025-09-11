@@ -1,0 +1,7 @@
+{
+  "semi": false,           // Sin punto y coma al final
+  "singleQuote": true,     // Usa comillas simples ('')
+  "tabWidth": 2,           // Espacios por tabulación
+  "trailingComma": "none", // Sin comas finales en objetos/arrays
+  "printWidth": 80         // Máximo de caracteres por línea
+}

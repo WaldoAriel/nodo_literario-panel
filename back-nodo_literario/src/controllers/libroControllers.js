@@ -1,0 +1,223 @@
+import { Router } from "express";
+import {
+  Categoria,
+  Libro,
+  Autor,
+  Editorial,
+  LibroAutor,
+} from "../models/index.js";
+import ImagenProducto from "../models/imagenProducto.models.js";
+
+// Obtener todas las libros activas
+
+const getAllLibros = async (req, res) => {
+  try {
+    const { id_categoria } = req.query;
+    let whereClause = { activa: true };
+
+    if (id_categoria) {
+      whereClause.id_categoria = id_categoria;
+    }
+
+    const libros = await Libro.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: ImagenProducto,
+          as: "imagenes",
+          attributes: ["id", "urlImagen"],
+          limit: 1, // la primera imagen para las cards
+          required: false,
+        },
+        {
+          model: Categoria,
+          as: "categoria",
+          attributes: ["nombre"],
+        },
+        {
+          model: Editorial,
+          as: "editorial",
+          attributes: ["nombre"],
+        },
+        {
+          model: Autor,
+          as: "autores",
+          attributes: ["id", "nombre", "apellido"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    // Transformar la data para el frontend
+    const librosTransformados = libros.map((libro) => {
+      const libroPlain = libro.get({ plain: true });
+      return {
+        ...libroPlain,
+        // Para LibroCard: usar la primera imagen como 'imagen'
+        imagen:
+          libroPlain.imagenes && libroPlain.imagenes.length > 0
+            ? libroPlain.imagenes[0].urlImagen
+            : "/placeholder-image.jpg",
+        // Para LibroCard: formatear el autor
+        autor:
+          libroPlain.autores && libroPlain.autores.length > 0
+            ? `${libroPlain.autores[0].nombre} ${libroPlain.autores[0].apellido}`
+            : "Autor desconocido",
+      };
+    });
+
+    res.json(librosTransformados);
+  } catch (error) {
+    console.error("❌ Error al obtener libros:", error);
+    res.status(500).json({ error: "Error al obtener los libros" });
+  }
+};
+
+// Obtener libro por id
+const getLibroById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const libro = await Libro.findByPk(id, {
+      include: [
+        {
+          model: ImagenProducto,
+          as: "imagenes",
+          attributes: ["id", "urlImagen"],
+        },
+        { model: Categoria, as: "categoria", attributes: ["id", "nombre"] },
+        { model: Editorial, as: "editorial", attributes: ["id", "nombre"] },
+        {
+          model: Autor,
+          as: "autores",
+          attributes: ["id", "nombre", "apellido"],
+          through: { attributes: [] }, //  para relaciones muchos a muchos, para no traer datos de la tabla intermedia
+        },
+      ],
+    });
+    if (!libro || !libro.activa) {
+      return res.status(404).json({ error: "Libro no encontrado o inactivo" });
+    }
+    res.json(libro);
+  } catch (error) {
+    console.error("Error al obtener el libro", error);
+    res.status(500).json({ error: "Error al obtener el libro" });
+  }
+};
+
+// crear un libro nuevo
+const createLibro = async (req, res) => {
+  try {
+    const {
+      id_categoria,
+      titulo,
+      isbn,
+      descripcion,
+      id_editorial,
+      precio,
+      stock,
+      activa,
+      oferta,
+      descuento,
+    } = req.body;
+    if (!id_categoria) {
+      return res.status(400).json({ error: "el ID de categoría es requerido" });
+    }
+
+    if (!id_editorial) {
+      return res.status(400).json({ error: "El ID de editorial es requerido" });
+    }
+
+    if (!titulo) {
+      return res
+        .status(400)
+        .json({ error: "El título del libro es requerido" });
+    }
+
+    const nuevaLibro = await Libro.create({
+      id_categoria,
+      titulo,
+      isbn,
+      descripcion,
+      id_editorial,
+      precio,
+      stock,
+      activa,
+      oferta,
+      descuento,
+    });
+    res.status(201).json(nuevaLibro);
+  } catch (error) {
+    console.error("❌ Error al crear libro:", error);
+    res.status(500).json({ error: "Error al crear la libro" });
+  }
+};
+
+// Actualizar libro
+const updateLibro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      id_categoria,
+      titulo,
+      isbn,
+      descripcion,
+      id_editorial,
+      precio,
+      stock,
+      activa,
+      descuento,
+      oferta,
+    } = req.body;
+
+    const libro = await Libro.findByPk(id);
+
+    if (!libro || !libro.activa) {
+      return res.status(404).json({ error: "Libro no encontrado o inactivo" });
+    }
+    if (id_categoria !== undefined) libro.id_categoria = id_categoria;
+    if (titulo !== undefined) libro.titulo = titulo;
+    if (isbn !== undefined) libro.isbn = isbn;
+    if (descripcion !== undefined) libro.descripcion = descripcion;
+    if (id_editorial !== undefined) libro.id_editorial = id_editorial;
+    if (precio !== undefined) libro.precio = precio;
+    if (stock !== undefined) libro.stock = stock;
+    if (activa !== undefined) libro.activa = activa;
+    if (oferta !== undefined) libro.oferta = oferta;
+    if (descuento !== undefined) libro.descuento = descuento;
+
+    await libro.save();
+
+    res.json(libro);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Algó pasó. No se pudo actualizar el libro" });
+  }
+};
+
+// Eliminar libro
+const deleteLibro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const libro = await Libro.findByPk(id);
+
+    if (!libro || !libro.activa) {
+      return res
+        .status(404)
+        .json({ error: "Libro no encontrado o ya eliminado" });
+    }
+
+    // Eliminación lógica
+    libro.activa = false;
+    await libro.save();
+
+    //  Eliminación física (se borra permanente)
+    // await libro.destroy();
+
+    res.json({ message: "Libro eliminado correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar la libro" });
+  }
+};
+
+export { getAllLibros, getLibroById, createLibro, updateLibro, deleteLibro };
