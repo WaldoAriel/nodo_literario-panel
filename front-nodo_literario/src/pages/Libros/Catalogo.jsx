@@ -23,7 +23,7 @@ function Catalogo() {
           url = `${url}?id_categoria=${id_categoria}`;
         }
         const response = await axios.get(url);
-        setLibros(response.data);
+        setLibros(response.data.libros || response.data);
       } catch (error) {
         console.error("Error al obtener los libros", error);
         setError(

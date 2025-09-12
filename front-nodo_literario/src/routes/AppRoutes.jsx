@@ -10,7 +10,13 @@ import Registro from "../pages/Auth/Registro";
 import Contacto from "../pages/Contacto";
 import Footer from "../components/Footer";
 import Categorias from "../pages/Libros/Categorias";
-import AdminLibros from "../pages/Admin/AdminLibros";
+import AdminLibros from "../admin/pages/AdminLibros";
+// componentes nuevos
+import AdminLayout from "../admin/components/AdminLayout";
+import Dashboard from "../admin/pages/Dashboard";
+// componentes de autores y categorías
+import AdminAutores from "../admin/pages/AdminAutores";
+import AdminCategorias from "../admin/pages/AdminCategorias";
 
 function AppRoutes() {
   const location = useLocation();
@@ -18,32 +24,56 @@ function AppRoutes() {
 
   return (
     <>
-      {!esRutaAdmin && <NavBar />}{" "}
-      {/* Se renderiza navbar solo si esRutaAdmin es false */}
+      {!esRutaAdmin && <NavBar />}
       <Routes>
-        {/* Página Principal */}
+        {/* Rutas Públicas */}
         <Route path="/" element={<Home />} />
-
-        {/* Libros */}
         <Route path="/catalogo" element={<Catalogo />} />
         <Route path="catalogo/categoria/:id_categoria" element={<Catalogo />} />
-        <Route path="categorias" element={<Categorias />}></Route>
+        <Route path="categorias" element={<Categorias />} />
         <Route path="/libro/:id" element={<DetalleLibro />} />
         <Route path="/contacto" element={<Contacto />} />
-
-        {/* Carrito  (falta implementar)*/}
         <Route path="/carrito" element={<Carrito />} />
         <Route path="/checkout" element={<Checkout />} />
-
-        {/* Autenticación (falta implementar) */}
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
 
-        {/* Panel de Administración */}
-        <Route path="/admin/libros" element={<AdminLibros />} />
+        {/* Rutas de Administración - Envueltas en AdminLayout */}
+        <Route
+          path="/admin"
+          element={
+            <AdminLayout>
+              <Dashboard />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/libros"
+          element={
+            <AdminLayout>
+              <AdminLibros />
+            </AdminLayout>
+          }
+        />
+        {/* rutas para autores y categorías */}
+        <Route
+          path="/admin/autores"
+          element={
+            <AdminLayout>
+              <AdminAutores />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/categorias"
+          element={
+            <AdminLayout>
+              <AdminCategorias />
+            </AdminLayout>
+          }
+        />
       </Routes>
-      {!esRutaAdmin && <Footer />}{" "}
-      {/* Se renderiza footer solo si esRutaAdmin es false */}
+      {!esRutaAdmin && <Footer />}
     </>
   );
 }

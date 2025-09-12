@@ -15,7 +15,7 @@ function Categorias() {
         const response = await axios.get(
           "http://localhost:3000/api/categorias"
         );
-        setCategorias(response.data);
+        setCategorias(response.data.categorias || response.data);
       } catch (error) {
         console.error("Error al obtener las categorías", error);
         setError("No se pudieron cargar las categorías");
@@ -76,15 +76,15 @@ function Categorias() {
         {categorias.map((categoria) => {
           return (
             <Button
-            key={categoria.id}
-            variant="contained"
-            component={Link}
-            to={`/catalogo/categoria/${categoria.id}`}
-            sx={{ mr: 1, mb: 1 }}
+              key={categoria.id}
+              variant="contained"
+              component={Link}
+              to={`/catalogo/categoria/${categoria.id}`}
+              sx={{ mr: 1, mb: 1 }}
             >
-            {categoria.nombre}
-          </Button>
-          )
+              {categoria.nombre}
+            </Button>
+          );
         })}
       </Box>
     </Box>
@@ -92,4 +92,3 @@ function Categorias() {
 }
 
 export default Categorias;
-  

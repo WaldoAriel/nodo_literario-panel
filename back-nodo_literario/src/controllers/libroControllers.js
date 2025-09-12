@@ -10,23 +10,30 @@ import ImagenProducto from "../models/imagenProducto.models.js";
 
 // Obtener todas las libros activas
 
+// back-nodo_literario/src/controllers/libroControllers.js
 const getAllLibros = async (req, res) => {
   try {
-    const { id_categoria } = req.query;
+    const { id_categoria, page = 1, limit = 10 } = req.query; // page y limit
     let whereClause = { activa: true };
 
     if (id_categoria) {
       whereClause.id_categoria = id_categoria;
     }
 
-    const libros = await Libro.findAll({
+    // Convertir a números y calcular offset
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // Usar findAndCountAll para obtener datos + total count
+    const { count, rows: libros } = await Libro.findAndCountAll({
       where: whereClause,
       include: [
         {
           model: ImagenProducto,
           as: "imagenes",
           attributes: ["id", "urlImagen"],
-          limit: 1, // la primera imagen para las cards
+          limit: 1,
           required: false,
         },
         {
@@ -46,19 +53,20 @@ const getAllLibros = async (req, res) => {
           through: { attributes: [] },
         },
       ],
+      limit: limitNumber,
+      offset: offset,
+      order: [["id", "DESC"]], // Ordena por ID descendente
     });
 
-    // Transformar la data para el frontend
+    // Transformar datos para el front
     const librosTransformados = libros.map((libro) => {
       const libroPlain = libro.get({ plain: true });
       return {
         ...libroPlain,
-        // Para LibroCard: usar la primera imagen como 'imagen'
         imagen:
           libroPlain.imagenes && libroPlain.imagenes.length > 0
             ? libroPlain.imagenes[0].urlImagen
             : "/placeholder-image.jpg",
-        // Para LibroCard: formatear el autor
         autor:
           libroPlain.autores && libroPlain.autores.length > 0
             ? `${libroPlain.autores[0].nombre} ${libroPlain.autores[0].apellido}`
@@ -66,7 +74,16 @@ const getAllLibros = async (req, res) => {
       };
     });
 
-    res.json(librosTransformados);
+    // devuelve respuesta paginada
+    res.json({
+      libros: librosTransformados,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages: Math.ceil(count / limitNumber),
+        totalItems: count,
+        itemsPerPage: limitNumber,
+      },
+    });
   } catch (error) {
     console.error("❌ Error al obtener libros:", error);
     res.status(500).json({ error: "Error al obtener los libros" });

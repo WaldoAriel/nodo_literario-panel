@@ -20,20 +20,22 @@ function Home() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchLibros = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/libros");
-        setLibrosDestacados(response.data.slice(1, 5));
-      } catch (error) {
-        console.error("Error al obtener los libros destacados", error);
-        setError("No se pudieron cargar los libros destacados");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchLibros = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/libros");
+      
+      setLibrosDestacados((response.data.libros || response.data).slice(1, 5));
+      
+    } catch (error) {
+      console.error("Error al obtener los libros destacados", error);
+      setError("No se pudieron cargar los libros destacados");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchLibros();
-  }, []);
+  fetchLibros();
+}, []);
 
   const settings = {
     dots: true,

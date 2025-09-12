@@ -1,121 +1,114 @@
-import { Autor, Libro } from "../models/index.js";
+import { Autor } from "../models/index.js";
 
-// lista de autores
+// Obtener todos los autores con paginación
 const getAllAutores = async (req, res) => {
   try {
-    const autores = await Autor.findAll();
-    res.json(autores);
+    const { page = 1, limit = 10 } = req.query;
+    
+    // Convertir a números y calcular offset
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // Usar findAndCountAll para obtener datos + total count
+    const { count, rows: autores } = await Autor.findAndCountAll({
+      limit: limitNumber,
+      offset: offset,
+      order: [['id', 'ASC']] // Ordenar por ID ascendente
+    });
+
+    // Devolver respuesta paginada
+    res.json({
+      autores,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages: Math.ceil(count / limitNumber),
+        totalItems: count,
+        itemsPerPage: limitNumber
+      }
+    });
+
   } catch (error) {
-    console.error("Error al obtener los autores", error);
-    res.status(500).json({ Error: "error al obtener la lista de autores" });
+    console.error("❌ Error al obtener autores:", error);
+    res.status(500).json({ error: "Error al obtener los autores" });
   }
 };
 
-// autor por id
-
+// Obtener autor por id
 const getAutorById = async (req, res) => {
   try {
     const { id } = req.params;
     const autor = await Autor.findByPk(id);
-
+    
     if (!autor) {
-      return res.status(404).json({ error: "No se encuentra el autor" });
+      return res.status(404).json({ error: "Autor no encontrado" });
     }
+    
     res.json(autor);
   } catch (error) {
-    console.error("error al obtener el autor por ID");
-    res.status(500).json({ error: "No pudimos obtener el autor" });
+    console.error("Error al obtener el autor", error);
+    res.status(500).json({ error: "Error al obtener el autor" });
   }
 };
 
-// crear Autor
-
+// Crear un autor nuevo
 const createAutor = async (req, res) => {
   try {
-    const {
-      nombre,
-      apellido,
-      biografia,
-      fechaNacimiento,
-      nacionalidad,
-      activo,
-    } = req.body;
-
-    if (!nombre || !apellido) {
-      return res
-        .status(400)
-        .json({ error: "Nombre y Apellido son campos obligatorios" });
+    const { nombre, apellido } = req.body;
+    
+    if (!nombre) {
+      return res.status(400).json({ error: "El nombre es requerido" });
     }
 
     const nuevoAutor = await Autor.create({
       nombre,
-      apellido,
-      biografia,
-      fechaNacimiento,
-      nacionalidad,
-      activo,
+      apellido: apellido || null
     });
+    
     res.status(201).json(nuevoAutor);
   } catch (error) {
-    console.error("Error al crear el autor", error);
-    res.status(500).json({ error: "Error al intentar crear el autor" });
+    console.error("❌ Error al crear autor:", error);
+    res.status(500).json({ error: "Error al crear el autor" });
   }
 };
 
-// actualizar autor
-
+// Actualizar autor
 const updateAutor = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      nombre,
-      apellido,
-      biografia,
-      fechaNacimiento,
-      nacionalidad,
-      activo,
-    } = req.body;
+    const { nombre, apellido } = req.body;
+
     const autor = await Autor.findByPk(id);
+
     if (!autor) {
       return res.status(404).json({ error: "Autor no encontrado" });
     }
 
     if (nombre !== undefined) autor.nombre = nombre;
     if (apellido !== undefined) autor.apellido = apellido;
-    if (biografia !== undefined) autor.biografia = biografia;
-    if (fechaNacimiento !== undefined) autor.fechaNacimiento = fechaNacimiento;
-    if (nacionalidad !== undefined) autor.nacionalidad = nacionalidad;
-    if (activo !== undefined) autor.activo = activo;
 
     await autor.save();
     res.json(autor);
   } catch (error) {
-    console.error("❌ Error al actualizar autor:", error);
     res.status(500).json({ error: "Error al actualizar el autor" });
   }
 };
 
-// eliminar autor
-
+// Eliminar autor
 const deleteAutor = async (req, res) => {
   try {
     const { id } = req.params;
     const autor = await Autor.findByPk(id);
+
     if (!autor) {
       return res.status(404).json({ error: "Autor no encontrado" });
     }
-    await autor.destroy()
-    res.json({message: "Autor eliminado de la base de datos"})
+
+    await autor.destroy();
+    res.json({ message: "Autor eliminado correctamente" });
   } catch (error) {
-    console.error("Error al eliminar el autor", error);
-    res.status(500).json({error:"No se pudo eliminar el autor de nuestra base de datos"})
+    res.status(500).json({ error: "Error al eliminar el autor" });
   }
 };
 
-export {
-  getAllAutores,
-  getAutorById,
-  createAutor,
-  updateAutor,
-  deleteAutor,
-}; 
+export { getAllAutores, getAutorById, createAutor, updateAutor, deleteAutor };
