@@ -26,6 +26,8 @@ import {
   FormGroup,
   FormControlLabel,
   ListItemText,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { libroService } from "../../admin/services/libroService";
@@ -53,9 +55,22 @@ export default function AdminLibros() {
     oferta: false,
     descuento: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Función para mostrar mensajes
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   // Cargar libros
   const cargarLibros = async (page = 1) => {
+    setLoading(true);
     try {
       const response = await libroService.getLibros(page, 4);
       setLibros(response.data.libros);
@@ -63,7 +78,10 @@ export default function AdminLibros() {
       setPaginaActual(page);
     } catch (error) {
       console.error("Error cargando libros:", error);
+      showSnackbar("Error al cargar los libros", "error");
       setLibros([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,7 +113,7 @@ export default function AdminLibros() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -112,10 +130,14 @@ export default function AdminLibros() {
         stock: libro.stock || "",
         id_categoria: libro.id_categoria || "",
         id_editorial: libro.id_editorial || "",
-        autores: libro.autores ? libro.autores.map(a => a.id) : [],
+        autores: libro.autores ? libro.autores.map((a) => a.id) : [],
         activa: libro.activa || true,
         oferta: libro.oferta || false,
         descuento: libro.descuento || 0,
+        imagenUrl:
+          libro.imagen ||
+          (libro.imagenes && libro.imagenes[0]?.urlImagen) ||
+          "",
       });
     } else {
       setCurrentLibro(null);
@@ -142,23 +164,40 @@ export default function AdminLibros() {
   };
 
   const handleSave = async () => {
+    if (!formData.titulo.trim()) {
+      showSnackbar("El título es requerido", "error");
+      return;
+    }
+    if (!formData.id_categoria) {
+      showSnackbar("Debe seleccionar una categoría", "error");
+      return;
+    }
+
+    setSaving(true);
     try {
       const libroData = {
         ...formData,
         precio: parseFloat(formData.precio),
         stock: parseInt(formData.stock),
         descuento: formData.oferta ? parseFloat(formData.descuento) : 0,
+        imagenUrl: formData.imagenUrl,
       };
 
       if (currentLibro) {
         await libroService.updateLibro(currentLibro.id, libroData);
+        showSnackbar("Libro actualizado correctamente");
       } else {
         await libroService.createLibro(libroData);
+        showSnackbar("Libro creado correctamente");
       }
+
       cargarLibros(paginaActual);
       handleCloseModal();
     } catch (error) {
       console.error("Error guardando libro:", error);
+      showSnackbar("Error al guardar el libro", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -168,15 +207,22 @@ export default function AdminLibros() {
       try {
         await libroService.deleteLibro(id);
         cargarLibros(paginaActual);
+        showSnackbar("Libro eliminado correctamente");
       } catch (error) {
         console.error("Error eliminando libro:", error);
+        showSnackbar("Error al eliminar el libro", "error");
       }
     }
   };
 
   return (
     <Container>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h4">Gestión de Libros</Typography>
         <Button
           variant="contained"
@@ -213,7 +259,9 @@ export default function AdminLibros() {
                   </TableCell>
                   <TableCell>${libro.precio}</TableCell>
                   <TableCell>{libro.stock}</TableCell>
-                  <TableCell>{libro.categoria?.nombre || "Sin categoría"}</TableCell>
+                  <TableCell>
+                    {libro.categoria?.nombre || "Sin categoría"}
+                  </TableCell>
                   <TableCell>
                     <IconButton onClick={() => handleOpenModal(libro)}>
                       <Edit />
@@ -244,7 +292,12 @@ export default function AdminLibros() {
         />
       </Box>
 
-      <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
+      <Dialog
+        open={openModal}
+        onClose={handleCloseModal}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>
           {currentLibro ? "Editar Libro" : "Nuevo Libro"}
         </DialogTitle>
@@ -271,7 +324,17 @@ export default function AdminLibros() {
             onChange={handleInputChange}
             sx={{ mb: 2 }}
           />
-
+          <TextField
+            margin="dense"
+            name="imagenUrl"
+            label="URL de la imagen"
+            fullWidth
+            variant="outlined"
+            value={formData.imagenUrl || ""}
+            onChange={handleInputChange}
+            sx={{ mb: 2 }}
+            helperText="Pega la URL de la imagen del libro"
+          />
           <TextField
             margin="dense"
             name="descripcion"
@@ -349,7 +412,9 @@ export default function AdminLibros() {
               multiple
               name="autores"
               value={formData.autores || []}
-              onChange={(e) => setFormData({ ...formData, autores: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, autores: e.target.value })
+              }
               label="Autores"
               renderValue={(selected) =>
                 selected
@@ -362,7 +427,9 @@ export default function AdminLibros() {
             >
               {autores.map((autor) => (
                 <MenuItem key={autor.id} value={autor.id}>
-                  <Checkbox checked={formData.autores?.includes(autor.id) || false} />
+                  <Checkbox
+                    checked={formData.autores?.includes(autor.id) || false}
+                  />
                   <ListItemText primary={`${autor.nombre} ${autor.apellido}`} />
                 </MenuItem>
               ))}
@@ -417,6 +484,18 @@ export default function AdminLibros() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

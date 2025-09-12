@@ -14,6 +14,8 @@ import administradorRoutes from "./src/routes/administrador.routes.js";
 import imagenProductoRoutes from "./src/routes/ImagenProducto.routes.js";
 import autorRoutes from "./src/routes/autor.routes.js";
 import libroAdminRoutes from "./src/routes/admin/libros.routes.js"
+import editorialRoutes from "./src/routes/editoriales.routes.js"
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -32,6 +34,7 @@ app.use(detallePedidoRoutes);
 app.use(administradorRoutes);
 app.use(imagenProductoRoutes);
 app.use(autorRoutes);
+app.use(editorialRoutes);
 app.use("/api/admin/libros", libroAdminRoutes)
 
 app.get("/", (req, res) => {
