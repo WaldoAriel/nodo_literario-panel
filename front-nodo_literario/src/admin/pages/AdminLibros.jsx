@@ -88,14 +88,29 @@ export default function AdminLibros() {
   // Cargar datos para los selects
   const cargarDatosRelaciones = async () => {
     try {
+      console.log("🔍 DEBUG: Intentando cargar relaciones...");
+
       const [catResponse, editResponse, autResponse] = await Promise.all([
         relacionesService.getCategorias(),
         relacionesService.getEditoriales(),
         relacionesService.getAutores(),
       ]);
-      setCategorias(catResponse.data.categorias || catResponse.data);
-      setEditoriales(editResponse.data.editoriales || editResponse.data);
-      setAutores(autResponse.data.autores || autResponse.data);
+
+      // VERIFICAR TODAS LAS POSIBLES ESTRUCTURAS
+      const categoriasData =
+        catResponse.data?.categorias ||
+        catResponse.data?.data ||
+        catResponse.data;
+      const editorialesData =
+        editResponse.data?.editoriales ||
+        editResponse.data?.data ||
+        editResponse.data;
+      const autoresData =
+        autResponse.data?.autores || autResponse.data?.data || autResponse.data;
+
+      setCategorias(Array.isArray(categoriasData) ? categoriasData : []);
+      setEditoriales(Array.isArray(editorialesData) ? editorialesData : []);
+      setAutores(Array.isArray(autoresData) ? autoresData : []);
     } catch (error) {
       console.error("Error cargando datos de relaciones:", error);
     }
@@ -412,9 +427,10 @@ export default function AdminLibros() {
               multiple
               name="autores"
               value={formData.autores || []}
-              onChange={(e) =>
-                setFormData({ ...formData, autores: e.target.value })
-              }
+              onChange={(e) => {
+                console.log("Autores seleccionados:", e.target.value); // DEBUUUGGG
+                setFormData({ ...formData, autores: e.target.value });
+              }}
               label="Autores"
               renderValue={(selected) =>
                 selected
@@ -424,6 +440,7 @@ export default function AdminLibros() {
                   })
                   .join(", ")
               }
+              onClose={() => console.log("Select cerrado")} // DEBUUUGGG
             >
               {autores.map((autor) => (
                 <MenuItem key={autor.id} value={autor.id}>
