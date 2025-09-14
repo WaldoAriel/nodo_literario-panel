@@ -321,4 +321,28 @@ const deleteLibro = async (req, res) => {
   }
 };
 
-export { getAllLibros, getLibroById, createLibro, updateLibro, deleteLibro };
+// controlador para subir imágenes
+const uploadImage = (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No se subió ningún archivo" });
+    }
+
+    res.json({
+      message: "Imagen subida correctamente",
+      filename: req.file.filename,
+      path: `/uploads/libros/${req.file.filename}`,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export {
+  getAllLibros,
+  getLibroById,
+  createLibro,
+  updateLibro,
+  deleteLibro,
+  uploadImage,
+};

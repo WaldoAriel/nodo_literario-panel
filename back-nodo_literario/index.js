@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import { sequelize, Categoria, Libro } from "./src/models/index.js";
+import path from "path";
+import { fileURLToPath } from "node:url";
 import categoriaRoutes from "./src/routes/categoria.routes.js";
 import libroRoutes from "./src/routes/libro.routes.js";
 import mensajeRoutes from "./src/routes/mensaje.routes.js";
@@ -19,6 +21,9 @@ import editorialRoutes from "./src/routes/editoriales.routes.js"
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" }));
 
@@ -36,6 +41,7 @@ app.use(imagenProductoRoutes);
 app.use(autorRoutes);
 app.use(editorialRoutes);
 app.use("/api/admin/libros", libroAdminRoutes)
+app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
 app.get("/", (req, res) => {
   res.send("¡Backend funcionando!");

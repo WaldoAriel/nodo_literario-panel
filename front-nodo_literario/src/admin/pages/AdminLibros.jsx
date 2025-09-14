@@ -32,6 +32,7 @@ import {
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { libroService } from "../../admin/services/libroService";
 import { relacionesService } from "../services/relacionesService";
+import ImageUploader from "../components/imageUploader";
 
 export default function AdminLibros() {
   const [libros, setLibros] = useState([]);
@@ -339,16 +340,11 @@ export default function AdminLibros() {
             onChange={handleInputChange}
             sx={{ mb: 2 }}
           />
-          <TextField
-            margin="dense"
-            name="imagenUrl"
-            label="URL de la imagen"
-            fullWidth
-            variant="outlined"
-            value={formData.imagenUrl || ""}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
-            helperText="Pega la URL de la imagen del libro"
+          <ImageUploader
+            onImageUpload={(imagePath) =>
+              setFormData({ ...formData, imagenUrl: imagePath })
+            }
+            existingImage={formData.imagenUrl}
           />
           <TextField
             margin="dense"
