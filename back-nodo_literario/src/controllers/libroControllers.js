@@ -120,6 +120,8 @@ const getLibroById = async (req, res) => {
 };
 
 const createLibro = async (req, res) => {
+  console.log("Datos recibidos:", req.body);
+  console.log("Imagen URL recibida:", req.body.imagenUrl);
   try {
     const {
       id_categoria,
@@ -133,6 +135,7 @@ const createLibro = async (req, res) => {
       oferta,
       descuento,
       autores,
+      imagenUrl,
     } = req.body;
 
     if (!id_categoria) {
@@ -160,6 +163,21 @@ const createLibro = async (req, res) => {
       descuento,
     });
 
+    // manejo de imégenes
+
+    if (imagenUrl) {
+      try {
+        await ImagenProducto.create({
+          id_libro: nuevaLibro.id,
+          urlImagen: imagenUrl,
+          esPortada: true,
+        });
+        console.log("Imagen de portada creada correctamente");
+      } catch (error) {
+        console.error("Error creando imagen:", error);
+      }
+    }
+
     // manejo de autores
     if (autores && Array.isArray(autores) && autores.length > 0) {
       try {
@@ -185,6 +203,8 @@ const createLibro = async (req, res) => {
 
 // Actualizar libro
 const updateLibro = async (req, res) => {
+  console.log("Datos recibidos:", req.body);
+  console.log("Imagen URL recibida:", req.body.imagenUrl);
   try {
     const { id } = req.params;
     const {
@@ -199,6 +219,7 @@ const updateLibro = async (req, res) => {
       descuento,
       oferta,
       autores,
+      imagenUrl,
     } = req.body;
 
     const libro = await Libro.findByPk(id);
@@ -220,7 +241,31 @@ const updateLibro = async (req, res) => {
     if (descuento !== undefined) libro.descuento = descuento;
 
     await libro.save();
+    // manejo de imágenes
+    if (imagenUrl !== undefined) {
+      try {
+        // Buscar si ya existe una imagen portada
+        const imagenExistente = await ImagenProducto.findOne({
+          where: { id_libro: libro.id, esPortada: true },
+        });
 
+        if (imagenExistente) {
+          // Actualizar imagen existente
+          imagenExistente.urlImagen = imagenUrl;
+          await imagenExistente.save();
+        } else {
+          // Crear nueva imagen portada
+          await ImagenProducto.create({
+            id_libro: libro.id,
+            urlImagen: imagenUrl,
+            esPortada: true,
+          });
+        }
+        console.log("Imagen de portada actualizada correctamente");
+      } catch (error) {
+        console.error("Error actualizando imagen:", error);
+      }
+    }
     // manejo de autores
     if (autores !== undefined) {
       try {
