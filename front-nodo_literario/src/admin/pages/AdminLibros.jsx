@@ -96,7 +96,7 @@ export default function AdminLibros() {
         relacionesService.getAutores(),
       ]);
 
-      // VERIFICAR TODAS LAS POSIBLES ESTRUCTURAS
+      // VEerificar las posibles estructuras
       const categoriasData =
         catResponse.data?.categorias ||
         catResponse.data?.data ||
@@ -425,11 +425,12 @@ export default function AdminLibros() {
             <InputLabel>Autores</InputLabel>
             <Select
               multiple
-              name="autores"
               value={formData.autores || []}
               onChange={(e) => {
-                console.log("Autores seleccionados:", e.target.value); // DEBUUUGGG
-                setFormData({ ...formData, autores: e.target.value });
+                const value = Array.isArray(e.target.value)
+                  ? e.target.value
+                  : [e.target.value];
+                setFormData({ ...formData, autores: value });
               }}
               label="Autores"
               renderValue={(selected) =>
@@ -440,13 +441,10 @@ export default function AdminLibros() {
                   })
                   .join(", ")
               }
-              onClose={() => console.log("Select cerrado")} // DEBUUUGGG
             >
               {autores.map((autor) => (
                 <MenuItem key={autor.id} value={autor.id}>
-                  <Checkbox
-                    checked={formData.autores?.includes(autor.id) || false}
-                  />
+                  <Checkbox checked={formData.autores?.includes(autor.id)} />
                   <ListItemText primary={`${autor.nombre} ${autor.apellido}`} />
                 </MenuItem>
               ))}

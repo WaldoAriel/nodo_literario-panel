@@ -9,8 +9,6 @@ import {
 import ImagenProducto from "../models/imagenProducto.models.js";
 
 // Obtener todas las libros activas
-
-// back-nodo_literario/src/controllers/libroControllers.js
 const getAllLibros = async (req, res) => {
   try {
     const { id_categoria, page = 1, limit = 10 } = req.query; // page y limit
@@ -25,7 +23,7 @@ const getAllLibros = async (req, res) => {
     const limitNumber = parseInt(limit);
     const offset = (pageNumber - 1) * limitNumber;
 
-    // Usar findAndCountAll para obtener datos + total count
+    // usamos findAndCountAll para obtener datos + total count
     const { count, rows: libros } = await Libro.findAndCountAll({
       where: whereClause,
       include: [
@@ -121,7 +119,6 @@ const getLibroById = async (req, res) => {
   }
 };
 
-// crear un libro nuevo
 const createLibro = async (req, res) => {
   try {
     const {
@@ -135,15 +132,15 @@ const createLibro = async (req, res) => {
       activa,
       oferta,
       descuento,
+      autores,
     } = req.body;
+
     if (!id_categoria) {
       return res.status(400).json({ error: "el ID de categoría es requerido" });
     }
-
     if (!id_editorial) {
       return res.status(400).json({ error: "El ID de editorial es requerido" });
     }
-
     if (!titulo) {
       return res
         .status(400)
@@ -162,10 +159,27 @@ const createLibro = async (req, res) => {
       oferta,
       descuento,
     });
+
+    // manejo de autores
+    if (autores && Array.isArray(autores) && autores.length > 0) {
+      try {
+        // Crear relaciones en la tabla intermedia LibroAutor
+        const relacionesAutores = autores.map((id_autor) => ({
+          id_libro: nuevaLibro.id,
+          id_autor: id_autor,
+        }));
+
+        await LibroAutor.bulkCreate(relacionesAutores);
+        console.log("Relaciones con autores creadas correctamente");
+      } catch (error) {
+        console.error("Error creando relaciones con autores:", error);
+      }
+    }
+
     res.status(201).json(nuevaLibro);
   } catch (error) {
     console.error("❌ Error al crear libro:", error);
-    res.status(500).json({ error: "Error al crear la libro" });
+    res.status(500).json({ error: "Error al crear el libro" });
   }
 };
 
@@ -184,6 +198,7 @@ const updateLibro = async (req, res) => {
       activa,
       descuento,
       oferta,
+      autores,
     } = req.body;
 
     const libro = await Libro.findByPk(id);
@@ -191,6 +206,8 @@ const updateLibro = async (req, res) => {
     if (!libro || !libro.activa) {
       return res.status(404).json({ error: "Libro no encontrado o inactivo" });
     }
+
+    // Actualizar campos simples
     if (id_categoria !== undefined) libro.id_categoria = id_categoria;
     if (titulo !== undefined) libro.titulo = titulo;
     if (isbn !== undefined) libro.isbn = isbn;
@@ -204,11 +221,33 @@ const updateLibro = async (req, res) => {
 
     await libro.save();
 
+    // manejo de autores
+    if (autores !== undefined) {
+      try {
+        // se eliminan relaciones existentes
+        await LibroAutor.destroy({
+          where: { id_libro: libro.id },
+        });
+
+        // creamos nuevas relaciones solo si hay autores
+        if (Array.isArray(autores) && autores.length > 0) {
+          const relacionesAutores = autores.map((id_autor) => ({
+            id_libro: libro.id,
+            id_autor: id_autor,
+          }));
+
+          await LibroAutor.bulkCreate(relacionesAutores);
+        }
+        console.log("Relaciones con autores actualizadas correctamente");
+      } catch (error) {
+        console.error("Error actualizando relaciones con autores:", error);
+      }
+    }
+
     res.json(libro);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Algó pasó. No se pudo actualizar el libro" });
+    console.error("❌ Error al actualizar libro:", error);
+    res.status(500).json({ error: "Error al actualizar el libro" });
   }
 };
 

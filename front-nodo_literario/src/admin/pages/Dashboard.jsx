@@ -9,7 +9,7 @@ export default function Dashboard() {
       </Typography>
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">
-          Panel de administración. Acá gestionamos libros, autores y categorías.
+          Panel de administración. Acá gestionamos libros, autores y categorías. ¡EN CONSTRUCCIÓN!
         </Typography>
       </Paper>
     </Box>
