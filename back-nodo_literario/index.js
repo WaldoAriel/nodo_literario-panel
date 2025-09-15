@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { sequelize, Categoria, Libro } from "./src/models/index.js";
 import path from "path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath } from "url";
 import categoriaRoutes from "./src/routes/categoria.routes.js";
 import libroRoutes from "./src/routes/libro.routes.js";
 import mensajeRoutes from "./src/routes/mensaje.routes.js";
