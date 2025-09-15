@@ -43,6 +43,8 @@ app.use(editorialRoutes);
 app.use("/api/admin/libros", libroAdminRoutes)
 app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
+
+
 app.get("/", (req, res) => {
   res.send("¡Backend funcionando!");
 });
