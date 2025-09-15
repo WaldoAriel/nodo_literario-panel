@@ -168,9 +168,9 @@ const createLibro = async (req, res) => {
     if (imagenUrl) {
       try {
         await ImagenProducto.create({
-          id_libro: id,
+          id_libro: nuevaLibro.id,
           urlImagen: imagenUrl,
-          //esPortada: true,
+          esPortada: true,
         });
         console.log("Imagen de portada creada correctamente");
       } catch (error) {
@@ -183,7 +183,7 @@ const createLibro = async (req, res) => {
       try {
         // Crear relaciones en la tabla intermedia LibroAutor
         const relacionesAutores = autores.map((id_autor) => ({
-          id_libro: id,
+          id_libro: nuevaLibro.id,
           id_autor: id_autor,
         }));
 
@@ -246,7 +246,7 @@ const updateLibro = async (req, res) => {
       try {
         // Buscar si ya existe una imagen portada
         const imagenExistente = await ImagenProducto.findOne({
-          where: { id_libro: id},
+          where: { id_libro: libro.id, esPortada: true },
         });
 
         if (imagenExistente) {
@@ -256,9 +256,9 @@ const updateLibro = async (req, res) => {
         } else {
           // Crear nueva imagen portada
           await ImagenProducto.create({
-            id_libro: id,
+            id_libro: libro.id,
             urlImagen: imagenUrl,
-            //esPortada: true,
+            esPortada: true,
           });
         }
         console.log("Imagen de portada actualizada correctamente");
@@ -271,13 +271,13 @@ const updateLibro = async (req, res) => {
       try {
         // se eliminan relaciones existentes
         await LibroAutor.destroy({
-          where: { id_libro: id },
+          where: { id_libro: libro.id },
         });
 
         // creamos nuevas relaciones solo si hay autores
         if (Array.isArray(autores) && autores.length > 0) {
           const relacionesAutores = autores.map((id_autor) => ({
-            id_libro: id,
+            id_libro: libro.id,
             id_autor: id_autor,
           }));
 
