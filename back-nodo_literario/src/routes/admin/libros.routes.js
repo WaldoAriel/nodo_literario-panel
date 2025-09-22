@@ -5,16 +5,20 @@ import {
   createLibro,
   updateLibro,
   deleteLibro,
+  uploadImage,
 } from "../../controllers/libroControllers.js";
+
+import upload from "../../middleware/upload.js"; // multer
 
 const router = Router();
 
-// Todas las rutas empiezan con /api/admin/libros
+router.get("/", getAllLibros);
+router.get("/:id", getLibroById);
+router.post("/", createLibro);
+router.put("/:id", updateLibro);
+router.delete("/:id", deleteLibro);
 
-router.get("/", getAllLibros);           // GET /api/admin/libros
-router.get("/:id", getLibroById);        // GET /api/admin/libros/1
-router.post("/", createLibro);           // POST /api/admin/libros
-router.put("/:id", updateLibro);         // PUT /api/admin/libros/1
-router.delete("/:id", deleteLibro);      // DELETE /api/admin/libros/1
+// ruta para subir imágenes
+router.post("/upload", upload.single('imagen'), uploadImage);
 
 export default router;

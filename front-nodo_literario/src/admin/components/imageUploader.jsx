@@ -28,7 +28,7 @@ export default function ImageUploader({ onImageUpload, existingImage }) {
       const formData = new FormData();
       formData.append('imagen', file);
 
-      const response = await fetch('http://localhost:3000/api/libros/upload', {
+      const response = await fetch('http://localhost:3000/api/admin/libros/upload', {
         method: 'POST',
         body: formData
       });
