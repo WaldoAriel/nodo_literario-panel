@@ -9,10 +9,10 @@ import {
 
 const router = Router();
 
-router.get("/api/editoriales", getAllEditoriales);
-router.get("/api/editoriales/:id", getEditorialById);
-router.post("/api/editoriales", createEditorial);
-router.put("/api/editoriales/:id", updateEditorial);
-router.delete("/api/editoriales/:id", deleteEditorial);
+router.get("/editoriales", getAllEditoriales);
+router.get("/editoriales/:id", getEditorialById);
+router.post("/editoriales", createEditorial);
+router.put("/editoriales/:id", updateEditorial);
+router.delete("/editoriales/:id", deleteEditorial);
 
 export default router;

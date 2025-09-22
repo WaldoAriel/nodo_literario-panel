@@ -9,10 +9,10 @@ import {
 
 const router = Router();
 
-router.get("/api/categorias", getAllCategorias); // GET all
-router.get("/api/categorias/:id", getCategoriaById); // GET by ID
-router.post("/api/categorias", createCategoria); // POST
-router.put("/api/categorias/:id", updateCategoria); // PUT
-router.delete("/api/categorias/:id", deleteCategoria); // DELETE
+router.get("/categorias", getAllCategorias); // GET all
+router.get("/categorias/:id", getCategoriaById); // GET by ID
+router.post("/categorias", createCategoria); // POST
+router.put("/categorias/:id", updateCategoria); // PUT
+router.delete("/categorias/:id", deleteCategoria); // DELETE
 
 export default router;
