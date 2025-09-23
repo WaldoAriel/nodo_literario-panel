@@ -10,10 +10,10 @@ import {
 const router = Router();
 
 // Rutas para Autores
-router.get("/api/autores", getAllAutores); // Obtener todos los autores
-router.get("/api/autores/:id", getAutorById); // Obtener un autor por ID
-router.post("/api/autores", createAutor); // Crear un nuevo autor
-router.put("/api/autores/:id", updateAutor); // Actualizar un autor por ID
-router.delete("/api/autores/:id", deleteAutor); // Eliminar un autor por ID
+router.get("/autores", getAllAutores); // Obtener todos los autores
+router.get("/autores/:id", getAutorById); // Obtener un autor por ID
+router.post("/autores", createAutor); // Crear un nuevo autor
+router.put("/autores/:id", updateAutor); // Actualizar un autor por ID
+router.delete("/autores/:id", deleteAutor); // Eliminar un autor por ID
 
 export default router;

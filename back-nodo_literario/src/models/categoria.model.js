@@ -17,6 +17,7 @@ const Categoria = sequelize.define(
     imagen: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: "default-category.png" 
     },
     activa: {
       type: DataTypes.BOOLEAN,
