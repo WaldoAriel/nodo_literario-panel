@@ -25,7 +25,7 @@ function LibroCard({
   return (
     <Card
       sx={{
-        maxWidth: 345,
+        maxWidth: 250,
         width: "100%",
         height: "100%",
         display: "flex",

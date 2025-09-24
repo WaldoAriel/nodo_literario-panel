@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { 
-  Box, 
-  TextField, 
-  MenuItem, 
-  Button, 
-  Stack, 
+import {
+  Box,
+  TextField,
+  MenuItem,
+  Button,
+  Stack,
   Typography,
-  Chip 
+  Chip,
 } from "@mui/material";
 import { Search, FilterAlt, Clear } from "@mui/icons-material";
 
@@ -16,32 +16,34 @@ function FilterBar({ libros, onFilter }) {
   const [priceRange, setPriceRange] = useState("");
 
   // Extraer autores únicos para el filtro
-  const autoresUnicos = [...new Set(libros.map(p => p.autor))];
+  const autoresUnicos = [...new Set(libros.map((p) => p.autor))];
 
   // Función para aplicar filtros
   const applyFilters = () => {
     let filtered = [...libros];
 
     if (searchTerm) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter((p) =>
         p.titulo.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedAutor) {
-      filtered = filtered.filter(p => p.autor === selectedAutor);
+      filtered = filtered.filter((p) => p.autor === selectedAutor);
     }
 
     if (priceRange) {
       switch (priceRange) {
         case "menos-10k":
-          filtered = filtered.filter(p => p.precio < 10000);
+          filtered = filtered.filter((p) => p.precio < 10000);
           break;
         case "10k-15k":
-          filtered = filtered.filter(p => p.precio >= 10000 && p.precio <= 15000);
+          filtered = filtered.filter(
+            (p) => p.precio >= 10000 && p.precio <= 15000
+          );
           break;
         case "mas-15k":
-          filtered = filtered.filter(p => p.precio > 15000);
+          filtered = filtered.filter((p) => p.precio > 15000);
           break;
         default:
           break;
@@ -61,7 +63,11 @@ function FilterBar({ libros, onFilter }) {
 
   return (
     <Box sx={{ p: 2, bgcolor: "background.paper", borderRadius: 2, mb: 3 }}>
-      <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center" }}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ display: "flex", alignItems: "center" }}
+      >
         <FilterAlt sx={{ mr: 1 }} /> Filtros
       </Typography>
 
@@ -73,6 +79,11 @@ function FilterBar({ libros, onFilter }) {
           size="small"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              applyFilters();
+            }
+          }}
           InputProps={{
             startAdornment: <Search sx={{ mr: 1, color: "action.active" }} />,
           }}
@@ -112,18 +123,14 @@ function FilterBar({ libros, onFilter }) {
         </TextField>
 
         {/* Botones */}
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={applyFilters}
           startIcon={<FilterAlt />}
         >
           Filtrar
         </Button>
-        <Button 
-          variant="outlined" 
-          onClick={resetFilters}
-          startIcon={<Clear />}
-        >
+        <Button variant="outlined" onClick={resetFilters} startIcon={<Clear />}>
           Limpiar
         </Button>
       </Stack>
@@ -131,20 +138,22 @@ function FilterBar({ libros, onFilter }) {
       {/* Chips de filtros activos (opcional) */}
       <Box sx={{ mt: 2 }}>
         {selectedAutor && (
-          <Chip 
-            label={`Autor: ${selectedAutor}`} 
-            onDelete={() => setSelectedAutor("")} 
+          <Chip
+            label={`Autor: ${selectedAutor}`}
+            onDelete={() => setSelectedAutor("")}
             sx={{ mr: 1, mb: 1 }}
           />
         )}
         {priceRange && (
-          <Chip 
-            label={`Precio: ${{
-              "menos-10k": "Menos de $10k",
-              "10k-15k": "$10k-$15k",
-              "mas-15k": "Más de $15k",
-            }[priceRange]}`} 
-            onDelete={() => setPriceRange("")} 
+          <Chip
+            label={`Precio: ${
+              {
+                "menos-10k": "Menos de $10k",
+                "10k-15k": "$10k-$15k",
+                "mas-15k": "Más de $15k",
+              }[priceRange]
+            }`}
+            onDelete={() => setPriceRange("")}
             sx={{ mr: 1, mb: 1 }}
           />
         )}

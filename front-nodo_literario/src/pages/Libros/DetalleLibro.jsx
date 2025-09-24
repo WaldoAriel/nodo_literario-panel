@@ -106,14 +106,6 @@ function DetalleLibro() {
   return (
     <Box sx={{ p: 4 }}>
       {/* Encabezado con título */}
-      <Typography
-        variant="h3"
-        component="h1"
-        gutterBottom
-        sx={{ mb: 4, textAlign: "center" }}
-      >
-        {libro.titulo}
-      </Typography>
 
       <Box
         sx={{
@@ -203,6 +195,14 @@ function DetalleLibro() {
             maxWidth: { md: "50%" },
           }}
         >
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            sx={{ mb: 4, textAlign: "center", p:3, backgroundColor: "primary.light", borderTopLeftRadius:15, borderTopRightRadius:15}}
+          >
+            {libro.titulo}
+          </Typography>
           {/* Autor */}
           <Typography variant="h5" color="text.secondary" gutterBottom>
             {libro.autores && libro.autores.length > 0
@@ -226,8 +226,8 @@ function DetalleLibro() {
               variant="outlined"
             />
             <Chip
-              label={libro.editorial?.nombre || "Sin editorial"}
-              color="secondary"
+              label= {`Editorial ${libro.editorial?.nombre || "Sin editorial"}`}
+              color="info"
               variant="outlined"
             />
           </Box>
