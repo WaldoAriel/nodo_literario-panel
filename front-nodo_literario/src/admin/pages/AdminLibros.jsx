@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
   Typography,
@@ -28,11 +28,134 @@ import {
   ListItemText,
   Snackbar,
   Alert,
+  Avatar,
+  Box as MuiBox,
 } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
-import { libroService } from "../../admin/services/libroService";
-import { relacionesService } from "../services/relacionesService";
-import ImageUploader from "../components/imageUploader";
+import {
+  Edit,
+  Delete,
+  Add,
+  CloudUpload,
+  CloudUpload as CloudUploadIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import axios from "axios";
+
+// Integración de libroService.js
+const libroService = {
+  getLibros: (page = 1, limit = 10) =>
+    axios.get(
+      `http://localhost:3000/api/admin/libros?page=${page}&limit=${limit}`
+    ),
+  createLibro: (libroData) =>
+    axios.post(`http://localhost:3000/api/admin/libros`, libroData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  updateLibro: (id, libroData) =>
+    axios.put(`http://localhost:3000/api/admin/libros/${id}`, libroData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  deleteLibro: (id) =>
+    axios.delete(`http://localhost:3000/api/admin/libros/${id}`),
+  getLibroById: (id) =>
+    axios.get(`http://localhost:3000/api/admin/libros/${id}`),
+};
+
+// Integración de relacionesService.js
+const relacionesService = {
+  getCategorias: () => axios.get(`http://localhost:3000/api/categorias`),
+  getEditoriales: () => axios.get(`http://localhost:3000/api/editoriales`),
+  getAutores: () => axios.get(`http://localhost:3000/api/autores`),
+};
+
+// Integración de ImageUploader.jsx
+const ImageUploader = ({ onImageSelect, existingImages = [] }) => {
+  const [previews, setPreviews] = useState([]);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (existingImages.length > 0) {
+      setPreviews(
+        existingImages.map((img) =>
+          typeof img === "string" ? img : URL.createObjectURL(img)
+        )
+      );
+    } else {
+      setPreviews([]);
+    }
+  }, [existingImages]);
+
+  const handleFileSelect = (event) => {
+    const files = Array.from(event.target.files);
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+
+    setPreviews(newPreviews);
+    onImageSelect(files);
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    const newPreviews = previews.filter((_, index) => index !== indexToRemove);
+    setPreviews(newPreviews);
+    onImageSelect(existingImages.filter((_, index) => index !== indexToRemove));
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <MuiBox sx={{ mb: 2 }}>
+      <input
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleFileSelect}
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        id="image-upload"
+      />
+
+      <label htmlFor="image-upload">
+        <Button
+          variant="outlined"
+          component="span"
+          startIcon={<CloudUploadIcon />}
+        >
+          {previews.length > 0 ? "Cambiar imágenes" : "Seleccionar imágenes"}
+        </Button>
+      </label>
+
+      {previews.length > 0 && (
+        <MuiBox sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 2 }}>
+          {previews.map((previewUrl, index) => (
+            <MuiBox key={index} sx={{ position: "relative" }}>
+              <img
+                src={previewUrl}
+                alt={`Vista previa ${index + 1}`}
+                style={{
+                  maxWidth: "100px",
+                  maxHeight: "100px",
+                  borderRadius: "8px",
+                }}
+              />
+              <IconButton
+                onClick={() => handleRemoveImage(index)}
+                sx={{
+                  position: "absolute",
+                  top: -10,
+                  right: -10,
+                  backgroundColor: "white",
+                }}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
+            </MuiBox>
+          ))}
+        </MuiBox>
+      )}
+    </MuiBox>
+  );
+};
 
 export default function AdminLibros() {
   const [libros, setLibros] = useState([]);
@@ -55,7 +178,18 @@ export default function AdminLibros() {
     activa: true,
     oferta: false,
     descuento: 0,
+    imageFiles: [],
+    imagesToRemove: [],
   });
+
+  const handleRemoveExistingImage = (imageUrl) => {
+    setFormData((prev) => ({
+      ...prev,
+      existingImages: prev.existingImages.filter((img) => img !== imageUrl),
+      imagesToRemove: [...prev.imagesToRemove, imageUrl],
+    }));
+  };
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -64,12 +198,10 @@ export default function AdminLibros() {
     severity: "success",
   });
 
-  // Función para mostrar mensajes
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
 
-  // Cargar libros
   const cargarLibros = async (page = 1) => {
     setLoading(true);
     try {
@@ -86,18 +218,14 @@ export default function AdminLibros() {
     }
   };
 
-  // Cargar datos para los selects
   const cargarDatosRelaciones = async () => {
     try {
-      console.log("🔍 DEBUG: Intentando cargar relaciones...");
-
       const [catResponse, editResponse, autResponse] = await Promise.all([
         relacionesService.getCategorias(),
         relacionesService.getEditoriales(),
         relacionesService.getAutores(),
       ]);
 
-      // VEerificar las posibles estructuras
       const categoriasData =
         catResponse.data?.categorias ||
         catResponse.data?.data ||
@@ -122,7 +250,6 @@ export default function AdminLibros() {
     cargarDatosRelaciones();
   }, []);
 
-  // Manejar cambio de página
   const handlePageChange = (event, value) => {
     cargarLibros(value);
   };
@@ -132,6 +259,13 @@ export default function AdminLibros() {
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleImageSelect = (files) => {
+    setFormData((prev) => ({
+      ...prev,
+      imageFiles: files,
     }));
   };
 
@@ -150,10 +284,7 @@ export default function AdminLibros() {
         activa: libro.activa || true,
         oferta: libro.oferta || false,
         descuento: libro.descuento || 0,
-        imagenUrl:
-          libro.imagen ||
-          (libro.imagenes && libro.imagenes[0]?.urlImagen) ||
-          "",
+        imageFiles: [],
       });
     } else {
       setCurrentLibro(null);
@@ -169,6 +300,7 @@ export default function AdminLibros() {
         activa: true,
         oferta: false,
         descuento: 0,
+        imageFiles: [],
       });
     }
     setOpenModal(true);
@@ -180,6 +312,11 @@ export default function AdminLibros() {
   };
 
   const handleSave = async () => {
+    if (formData.imagesToRemove && formData.imagesToRemove.length > 0) {
+      formData.imagesToRemove.forEach((url) => {
+        libroData.append("imagesToRemove[]", url);
+      });
+    }
     if (!formData.titulo.trim()) {
       showSnackbar("El título es requerido", "error");
       return;
@@ -188,17 +325,37 @@ export default function AdminLibros() {
       showSnackbar("Debe seleccionar una categoría", "error");
       return;
     }
+    if (!currentLibro && formData.imageFiles.length === 0) {
+      showSnackbar("Debe seleccionar al menos una imagen", "error");
+      return;
+    }
 
     setSaving(true);
-    try {
-      const libroData = {
-        ...formData,
-        precio: parseFloat(formData.precio),
-        stock: parseInt(formData.stock),
-        descuento: formData.oferta ? parseFloat(formData.descuento) : 0,
-        imagenUrl: formData.imagenUrl,
-      };
 
+    const libroData = new FormData();
+
+    libroData.append("titulo", formData.titulo);
+    libroData.append("isbn", formData.isbn);
+    libroData.append("descripcion", formData.descripcion);
+    libroData.append("precio", parseFloat(formData.precio));
+    libroData.append("stock", parseInt(formData.stock));
+    libroData.append("id_categoria", formData.id_categoria);
+    libroData.append("id_editorial", formData.id_editorial);
+    libroData.append("activa", formData.activa);
+    libroData.append("oferta", formData.oferta);
+    libroData.append(
+      "descuento",
+      formData.oferta ? parseFloat(formData.descuento) : 0
+    );
+    formData.autores.forEach((autorId) => {
+      libroData.append("autores[]", autorId);
+    });
+
+    formData.imageFiles.forEach((file) => {
+      libroData.append("imagenes", file);
+    });
+
+    try {
       if (currentLibro) {
         await libroService.updateLibro(currentLibro.id, libroData);
         showSnackbar("Libro actualizado correctamente");
@@ -206,7 +363,6 @@ export default function AdminLibros() {
         await libroService.createLibro(libroData);
         showSnackbar("Libro creado correctamente");
       }
-
       cargarLibros(paginaActual);
       handleCloseModal();
     } catch (error) {
@@ -217,17 +373,18 @@ export default function AdminLibros() {
     }
   };
 
-  // Eliminar libro
   const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este libro?")) {
-      try {
-        await libroService.deleteLibro(id);
-        cargarLibros(paginaActual);
-        showSnackbar("Libro eliminado correctamente");
-      } catch (error) {
-        console.error("Error eliminando libro:", error);
-        showSnackbar("Error al eliminar el libro", "error");
-      }
+    showSnackbar(
+      "Función de confirmación aún no implementada, pero el código de eliminación ya está disponible.",
+      "info"
+    );
+    try {
+      await libroService.deleteLibro(id);
+      showSnackbar("Libro eliminado correctamente");
+      cargarLibros(paginaActual);
+    } catch (error) {
+      console.error("Error eliminando libro:", error);
+      showSnackbar("Error al eliminar el libro", "error");
     }
   };
 
@@ -341,10 +498,9 @@ export default function AdminLibros() {
             sx={{ mb: 2 }}
           />
           <ImageUploader
-            onImageUpload={(imagePath) =>
-              setFormData({ ...formData, imagenUrl: imagePath })
-            }
-            existingImage={formData.imagenUrl}
+            onImageSelect={handleImageSelect}
+            onRemoveExisting={handleRemoveExistingImage}
+            existingImages={formData.existingImages || []}
           />
           <TextField
             margin="dense"
@@ -490,8 +646,8 @@ export default function AdminLibros() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal}>Cancelar</Button>
-          <Button onClick={handleSave} variant="contained">
-            Guardar
+          <Button onClick={handleSave} variant="contained" disabled={saving}>
+            {saving ? "Guardando..." : "Guardar"}
           </Button>
         </DialogActions>
       </Dialog>

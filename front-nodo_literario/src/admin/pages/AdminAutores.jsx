@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -17,10 +17,10 @@ import {
   DialogActions,
   TextField,
   Box,
-  Pagination
-} from '@mui/material';
-import { Edit, Delete, Add } from '@mui/icons-material';
-import { autorService } from '../services/autorService';
+  Pagination,
+} from "@mui/material";
+import { Edit, Delete, Add } from "@mui/icons-material";
+import { autorService } from "../services/autorService";
 
 export default function AdminAutores() {
   const [autores, setAutores] = useState([]);
@@ -29,8 +29,8 @@ export default function AdminAutores() {
   const [paginaActual, setPaginaActual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: ''
+    nombre: "",
+    apellido: "",
   });
 
   const cargarAutores = async (page = 1) => {
@@ -40,7 +40,7 @@ export default function AdminAutores() {
       setTotalPaginas(response.data.pagination?.totalPages || 1);
       setPaginaActual(page);
     } catch (error) {
-      console.error('Error cargando autores:', error);
+      console.error("Error cargando autores:", error);
       setAutores([]);
     }
   };
@@ -53,12 +53,12 @@ export default function AdminAutores() {
     if (autor) {
       setCurrentAutor(autor);
       setFormData({
-        nombre: autor.nombre || '',
-        apellido: autor.apellido || ''
+        nombre: autor.nombre || "",
+        apellido: autor.apellido || "",
       });
     } else {
       setCurrentAutor(null);
-      setFormData({ nombre: '', apellido: '' });
+      setFormData({ nombre: "", apellido: "" });
     }
     setOpenModal(true);
   };
@@ -66,13 +66,13 @@ export default function AdminAutores() {
   const handleCloseModal = () => {
     setOpenModal(false);
     setCurrentAutor(null);
-    setFormData({ nombre: '', apellido: '' });
+    setFormData({ nombre: "", apellido: "" });
   };
 
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -86,24 +86,29 @@ export default function AdminAutores() {
       cargarAutores(paginaActual);
       handleCloseModal();
     } catch (error) {
-      console.error('Error guardando autor:', error);
+      console.error("Error guardando autor:", error);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este autor?')) {
+    if (window.confirm("¿Estás seguro de eliminar este autor?")) {
       try {
         await autorService.deleteAutor(id);
         cargarAutores(paginaActual);
       } catch (error) {
-        console.error('Error eliminando autor:', error);
+        console.error("Error eliminando autor:", error);
       }
     }
   };
 
   return (
     <Container>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h4">Gestión de Autores</Typography>
         <Button
           variant="contained"
@@ -118,26 +123,27 @@ export default function AdminAutores() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nombre</TableCell>
               <TableCell>Apellido</TableCell>
+              <TableCell>Nombre</TableCell>
               <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {autores && autores.map((autor) => (
-              <TableRow key={autor.id}>
-                <TableCell>{autor.nombre}</TableCell>
-                <TableCell>{autor.apellido}</TableCell>
-                <TableCell>
-                  <IconButton onClick={() => handleOpenModal(autor)}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(autor.id)}>
-                    <Delete />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {autores &&
+              autores.map((autor) => (
+                <TableRow key={autor.id}>
+                  <TableCell>{autor.apellido}</TableCell>
+                  <TableCell>{autor.nombre}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleOpenModal(autor)}>
+                      <Edit />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(autor.id)}>
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -153,9 +159,18 @@ export default function AdminAutores() {
 
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>
-          {currentAutor ? 'Editar Autor' : 'Nuevo Autor'}
+          {currentAutor ? "Editar Autor" : "Nuevo Autor"}
         </DialogTitle>
         <DialogContent>
+          <TextField
+            margin="dense"
+            name="apellido"
+            label="Apellido"
+            fullWidth
+            variant="outlined"
+            value={formData.apellido}
+            onChange={handleInputChange}
+          />
           <TextField
             autoFocus
             margin="dense"
@@ -166,15 +181,6 @@ export default function AdminAutores() {
             value={formData.nombre}
             onChange={handleInputChange}
             sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            name="apellido"
-            label="Apellido"
-            fullWidth
-            variant="outlined"
-            value={formData.apellido}
-            onChange={handleInputChange}
           />
         </DialogContent>
         <DialogActions>

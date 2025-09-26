@@ -23,7 +23,20 @@ function Catalogo() {
           url = `${url}?id_categoria=${id_categoria}`;
         }
         const response = await axios.get(url);
-        setLibros(response.data.libros || response.data);
+        
+        const fetchedLibros = response.data.libros || response.data;
+        
+        // ordena alfabéticamente x título
+        const sortedLibros = fetchedLibros.sort((a, b) => {
+          if (a.titulo && b.titulo) {
+            return a.titulo.localeCompare(b.titulo);
+          }
+          return 0;
+        });
+
+        // setea los libros ordenados en el estado
+        setLibros(sortedLibros);
+        
       } catch (error) {
         console.error("Error al obtener los libros", error);
         setError(
@@ -34,7 +47,7 @@ function Catalogo() {
       }
     };
     fetchLibros();
-  }, [id_categoria]); //para que se ejecute cuando cambia id_categoria
+  }, [id_categoria]);
 
   useEffect(() => {
     setFilteredLibros(libros);
@@ -73,7 +86,7 @@ function Catalogo() {
       >
         <CircularProgress />
         <Typography variant="h6" sx={{ ml: 2 }}>
-          ${error}
+          {error}
         </Typography>
       </div>
     );

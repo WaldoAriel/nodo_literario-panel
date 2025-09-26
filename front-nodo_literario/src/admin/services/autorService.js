@@ -3,8 +3,8 @@ import axios from 'axios';
 const API_URL = 'http://localhost:3000/api';
 
 export const autorService = {
-  getAutores: (page = 1, limit = 10) => 
-    axios.get(`${API_URL}/autores?page=${page}&limit=${limit}`),
+  getAutores: (page = 1, limit = 10, sortBy = 'apellido', sortDirection = 'asc') => 
+    axios.get(`${API_URL}/autores?page=${page}&limit=${limit}&sortBy=${sortBy}&sortDirection=${sortDirection}`),
   
   createAutor: (autorData) => 
     axios.post(`${API_URL}/autores`, autorData),

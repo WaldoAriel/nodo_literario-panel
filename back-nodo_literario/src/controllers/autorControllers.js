@@ -1,23 +1,26 @@
 import { Autor } from "../models/index.js";
 
-// Obtener todos los autores con paginación
+// traer todos los autores con paginación
 const getAllAutores = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    
+    const { page = 1, limit = 10, sortBy = 'apellido', sortDirection = 'asc' } = req.query;
+
     // Convertir a números y calcular offset
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
     const offset = (pageNumber - 1) * limitNumber;
 
-    // Usar findAndCountAll para obtener datos + total count
+    // recibir y aplicar los parámetros de ordenamiento
+    const order = [[sortBy, sortDirection.toUpperCase()]];
+
+    // findAndCountAll para obtener datos + total count
     const { count, rows: autores } = await Autor.findAndCountAll({
       limit: limitNumber,
       offset: offset,
-      order: [['id', 'ASC']] // Ordenar por ID ascendente
+      order: order
     });
 
-    // Devolver respuesta paginada
+    // respuesta paginada
     res.json({
       autores,
       pagination: {
@@ -33,7 +36,6 @@ const getAllAutores = async (req, res) => {
     res.status(500).json({ error: "Error al obtener los autores" });
   }
 };
-
 // Obtener autor por id
 const getAutorById = async (req, res) => {
   try {

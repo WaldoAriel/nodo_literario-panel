@@ -1,11 +1,10 @@
 import { Router } from "express";
 import {
-  getAllLibros,
-  getLibroById,
-  createLibro,
-  updateLibro,
-  deleteLibro,
-  uploadImage,
+ getAllLibros,
+ getLibroById,
+ createLibro,
+ updateLibro,
+ deleteLibro,
 } from "../../controllers/libroControllers.js";
 
 import upload from "../../middleware/upload.js"; // multer
@@ -14,11 +13,16 @@ const router = Router();
 
 router.get("/", getAllLibros);
 router.get("/:id", getLibroById);
-router.post("/", createLibro);
-router.put("/:id", updateLibro);
+
+// 💡 Nueva ruta: Ahora `createLibro` procesa las imágenes directamente.
+router.post("/", upload.array("imagenes", 5), createLibro);
+
+// 💡 Nueva ruta: También `updateLibro` puede recibir nuevas imágenes.
+router.put("/:id", upload.array("imagenes", 5), updateLibro);
+
 router.delete("/:id", deleteLibro);
 
-// ruta para subir imágenes
-router.post("/upload", upload.single('imagen'), uploadImage);
+// ❌ Eliminamos la ruta de subida de imágenes separada.
+// router.post("/upload", upload.single('imagen'), uploadImage);
 
 export default router;

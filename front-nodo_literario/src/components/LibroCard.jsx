@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
-function LibroCard({ 
+function LibroCard({
   id,
   titulo,
   autor,
@@ -77,7 +77,7 @@ function LibroCard({
         />
       )}
 
-      {/* Contenedor para la imagen del prod */} 
+      {/* Contenedor para la imagen del prod */}
       <Box
         sx={{
           display: "flex",
@@ -169,14 +169,14 @@ function LibroCard({
         <Button
           variant="contained"
           fullWidth
-          disabled={stock === 0} //desabilita si no hay stock
-          sx={{
-            backgroundColor: "primary.main",
-            "&:hover": { backgroundColor: "primary.dark" },
-            "&:disabled": { opacity: 0.6 },
-          }}
           component={Link}
           to={`/libro/${id}`}
+          sx={{
+            backgroundColor: stock === 0 ? "grey.500" : "primary.main",
+            "&:hover": {
+              backgroundColor: stock === 0 ? "grey.500" : "primary.dark",
+            },
+          }}
         >
           {stock === 0 ? "SIN STOCK" : "Más detalles"}
         </Button>

@@ -18,17 +18,17 @@ import autorRoutes from "./src/routes/autor.routes.js";
 import editorialRoutes from "./src/routes/editoriales.routes.js";
 import adminLibrosRoutes from "./src/routes/admin/libros.routes.js";  // admin 
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors({ origin: "http://localhost:5173" }));
 
-// Servir archivos estáticos (imágenes)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", categoriaRoutes);
 app.use("/api", libroRoutes); 
 app.use("/api", mensajeRoutes);

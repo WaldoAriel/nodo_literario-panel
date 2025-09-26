@@ -18,6 +18,11 @@ const ImagenProducto = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    esPortada: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
   },
   {
     tableName: "ImagenesProducto",
