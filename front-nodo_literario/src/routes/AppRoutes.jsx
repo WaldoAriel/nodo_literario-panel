@@ -17,6 +17,9 @@ import Dashboard from "../admin/pages/Dashboard";
 // componentes de autores y categorías
 import AdminAutores from "../admin/pages/AdminAutores";
 import AdminCategorias from "../admin/pages/AdminCategorias";
+//Importar ProtectedRoute
+import ProtectedRoute from "../components/ProtectedRoute";
+import { Box, Typography } from "@mui/material";
 
 function AppRoutes() {
   const location = useLocation();
@@ -38,39 +41,62 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
 
-        {/* Rutas de Administración - Envueltas en AdminLayout */}
+        {/* Rutas de Administración - PROTEGIDAS */}
         <Route
           path="/admin"
           element={
-            <AdminLayout>
-              <Dashboard />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <Dashboard />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/libros"
           element={
-            <AdminLayout>
-              <AdminLibros />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminLibros />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         {/* rutas para autores y categorías */}
         <Route
           path="/admin/autores"
           element={
-            <AdminLayout>
-              <AdminAutores />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminAutores />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/categorias"
           element={
-            <AdminLayout>
-              <AdminCategorias />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminCategorias />
+              </AdminLayout>
+            </ProtectedRoute>
           }
+        />
+
+        {/* Ruta para páginas no encontradas */}
+        <Route 
+          path="*" 
+          element={
+            <Box sx={{ textAlign: 'center', padding: 4, marginTop: 4 }}>
+              <Typography variant="h4" gutterBottom>
+                Página No Encontrada
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                La página que buscas no existe.
+              </Typography>
+            </Box>
+          } 
         />
       </Routes>
       {!esRutaAdmin && <Footer />}
