@@ -18,6 +18,9 @@ import autorRoutes from "./src/routes/autor.routes.js";
 import editorialRoutes from "./src/routes/editoriales.routes.js";
 import adminLibrosRoutes from "./src/routes/admin/libros.routes.js";  // admin 
 
+import authRoutes from "./src/routes/auth.routes.js";
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -45,6 +48,9 @@ app.use("/api", editorialRoutes);
 
 // Router para admin libros (CRUD + upload)
 app.use("/api/admin/libros", adminLibrosRoutes); 
+
+// Rutas de autenticación
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.send("¡Backend funcionando!");

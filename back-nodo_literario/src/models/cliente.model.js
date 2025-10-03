@@ -10,6 +10,10 @@ const Cliente = sequelize.define(
       primaryKey: true,
       allowNull: false,
     },
+    id_usuario: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     nombre: {
       type: DataTypes.STRING(100),
       allowNull: false,
@@ -21,10 +25,6 @@ const Cliente = sequelize.define(
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true,
-      },
     },
     telefono: {
       type: DataTypes.STRING(20),
@@ -33,7 +33,10 @@ const Cliente = sequelize.define(
     fecha_registro: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false,
+    },
+    tipo_cliente: {
+      type: DataTypes.ENUM("regular", "premium", "vip"),
+      defaultValue: "regular",
     },
   },
   {
