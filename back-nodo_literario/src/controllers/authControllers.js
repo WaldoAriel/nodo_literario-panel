@@ -13,9 +13,9 @@ const register = async (req, res) => {
       });
     }
 
-    if (password.length < 7) {
+    if (password.length < 6) {
       return res.status(400).json({
-        error: 'La contraseña debe tener al menos 7 caracteres'
+        error: 'La contraseña debe tener al menos 6 caracteres'
       });
     }
 

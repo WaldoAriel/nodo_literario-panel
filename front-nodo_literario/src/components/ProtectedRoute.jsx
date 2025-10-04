@@ -1,23 +1,27 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useAdminAuth } from "../context/AdminAuthContext";
+import { Box, Typography, CircularProgress, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function ProtectedRoute({ children, requireAdmin = false }) {
   const { user, isAuthenticated, loading } = useAuth();
+  const { admin, isAdminAuthenticated, loading: adminLoading } = useAdminAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Mostrar loading mientras se verifica la autenticación
-  if (loading) {
+  // Si estamos verificando autenticación, mostrar loading
+  if (loading || (requireAdmin && adminLoading)) {
     return (
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '50vh',
-          gap: 2
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          gap: 2,
         }}
       >
         <CircularProgress size={60} />
@@ -28,33 +32,17 @@ export default function ProtectedRoute({ children, requireAdmin = false }) {
     );
   }
 
-  // Si no está autenticado, redirigir al login
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // RUTAS ADMIN
+  if (requireAdmin) {
+    if (!isAdminAuthenticated) {
+      return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    }
+    return children;
   }
 
-  // Si requiere ser admin pero el usuario no lo es
-  if (requireAdmin && user?.tipo !== 'administrador') {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '50vh',
-          gap: 2,
-          padding: 4
-        }}
-      >
-        <Typography variant="h4" color="error" gutterBottom>
-          Acceso Denegado
-        </Typography>
-        <Typography variant="body1" color="text.secondary" align="center">
-          No tienes permisos para acceder a esta sección.
-        </Typography>
-      </Box>
-    );
+  // Lógica para rutas normales (clientes)
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

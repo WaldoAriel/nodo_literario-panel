@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:3000/api/auth';
+const API_URL = "http://localhost:3000/api/auth";
 
 // Configurar axios para incluir credenciales
 axios.defaults.withCredentials = false;
@@ -16,7 +16,7 @@ const authService = {
   login: async (email, password) => {
     const response = await axios.post(`${API_URL}/login`, {
       email,
-      password
+      password,
     });
     return response.data;
   },
@@ -24,33 +24,47 @@ const authService = {
   // Refresh token
   refreshToken: async (refreshToken) => {
     const response = await axios.post(`${API_URL}/refresh-token`, {
-      refreshToken
+      refreshToken,
     });
     return response.data;
   },
 
-  // Obtener perfil de usuario
+  // Obtener perfil de usuario - ACTUALIZAR
   getProfile: async (token) => {
     const response = await axios.get(`${API_URL}/profile`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
-    return response.data;
-  },
 
+    // DECODIFICAR EL TOKEN PARA OBTENER TIPO Y ROL
+    const tokenData = JSON.parse(atob(token.split(".")[1]));
+
+    return {
+      ...response.data,
+      usuario: {
+        ...response.data.usuario,
+        tipo: tokenData.tipo || "cliente",
+        rol: tokenData.rol,
+      },
+    };
+  },
   // Cambiar contraseña
   changePassword: async (token, currentPassword, newPassword) => {
-    const response = await axios.put(`${API_URL}/change-password`, {
-      currentPassword,
-      newPassword
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await axios.put(
+      `${API_URL}/change-password`,
+      {
+        currentPassword,
+        newPassword,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     return response.data;
-  }
+  },
 };
 
 export default authService;

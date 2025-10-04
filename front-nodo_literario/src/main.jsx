@@ -6,15 +6,18 @@ import { CartProvider } from "./context/CartContext";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 import { AuthProvider } from "./context/AuthContext";
+import { AdminAuthProvider } from "./context/AdminAuthContext";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <AuthProvider>
-          <CartProvider>
-            <AppRoutes />
-          </CartProvider>
+          <AdminAuthProvider>
+            <CartProvider>
+              <AppRoutes />
+            </CartProvider>
+          </AdminAuthProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

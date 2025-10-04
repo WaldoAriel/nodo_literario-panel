@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import authService from '../services/authService';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import authService from "../services/authService";
 
 // Crear el contexto
 const AuthContext = createContext();
@@ -9,7 +9,7 @@ const AuthContext = createContext();
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error("useAuth debe ser usado dentro de un AuthProvider");
   }
   return context;
 };
@@ -33,13 +33,23 @@ export const AuthProvider = ({ children }) => {
       const savedTokens = getStoredTokens();
       if (savedTokens) {
         setTokens(savedTokens);
-        
+
         // Verificar si el token es válido obteniendo el perfil
         const profile = await authService.getProfile(savedTokens.accessToken);
-        setUser(profile.usuario);
+
+        // DECODIFICAR EL TOKEN PARA OBTENER EL TIPO DE USUARIO
+        const tokenData = JSON.parse(
+          atob(savedTokens.accessToken.split(".")[1])
+        );
+
+        setUser({
+          ...profile.usuario,
+          tipo: tokenData.tipo || "cliente",
+          rol: tokenData.rol,
+        });
       }
     } catch (error) {
-      console.error('Error verificando autenticación:', error);
+      console.error("Error verificando autenticación:", error);
       logout(); // Si hay error, hacer logout
     } finally {
       setLoading(false);
@@ -48,14 +58,14 @@ export const AuthProvider = ({ children }) => {
 
   // Guardar tokens en localStorage
   const storeTokens = (newTokens) => {
-    localStorage.setItem('authTokens', JSON.stringify(newTokens));
+    localStorage.setItem("authTokens", JSON.stringify(newTokens));
     setTokens(newTokens);
   };
 
   // Obtener tokens de localStorage
   const getStoredTokens = () => {
     try {
-      const stored = localStorage.getItem('authTokens');
+      const stored = localStorage.getItem("authTokens");
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
       return null;
@@ -64,7 +74,7 @@ export const AuthProvider = ({ children }) => {
 
   // Limpiar tokens
   const clearTokens = () => {
-    localStorage.removeItem('authTokens');
+    localStorage.removeItem("authTokens");
     setTokens(null);
   };
 
@@ -76,9 +86,9 @@ export const AuthProvider = ({ children }) => {
       setUser(response.usuario);
       return { success: true, data: response };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Error en el registro' 
+      return {
+        success: false,
+        error: error.response?.data?.error || "Error en el registro",
       };
     }
   };
@@ -88,17 +98,23 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.login(email, password);
       storeTokens(response.tokens);
-      setUser(response.usuario);
-      
+
+      // GUARDAR USUARIO COMPLETO CON TIPO Y ROL
+      setUser({
+        ...response.usuario,
+        tipo: response.esAdministrador ? "administrador" : "cliente",
+        rol: response.rol,
+      });
+
       // Redirigir a la página que intentaban acceder o al home
-      const from = location.state?.from?.pathname || '/';
+      const from = location.state?.from?.pathname || "/";
       navigate(from, { replace: true });
-      
+
       return { success: true, data: response };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Error en el login' 
+      return {
+        success: false,
+        error: error.response?.data?.error || "Error en el login",
       };
     }
   };
@@ -113,7 +129,7 @@ export const AuthProvider = ({ children }) => {
   const refreshAuthToken = async () => {
     try {
       if (!tokens?.refreshToken) {
-        throw new Error('No hay refresh token disponible');
+        throw new Error("No hay refresh token disponible");
       }
 
       const response = await authService.refreshToken(tokens.refreshToken);
@@ -131,7 +147,7 @@ export const AuthProvider = ({ children }) => {
 
     // Verificar si el token está expirado
     try {
-      const tokenData = JSON.parse(atob(tokens.accessToken.split('.')[1]));
+      const tokenData = JSON.parse(atob(tokens.accessToken.split(".")[1]));
       const isExpired = tokenData.exp * 1000 < Date.now();
 
       if (isExpired) {
@@ -140,7 +156,7 @@ export const AuthProvider = ({ children }) => {
 
       return tokens.accessToken;
     } catch (error) {
-      console.error('Error verificando token:', error);
+      console.error("Error verificando token:", error);
       return null;
     }
   };
@@ -150,15 +166,19 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await getAccessToken();
       if (!token) {
-        throw new Error('No autenticado');
+        throw new Error("No autenticado");
       }
 
-      const response = await authService.changePassword(token, currentPassword, newPassword);
+      const response = await authService.changePassword(
+        token,
+        currentPassword,
+        newPassword
+      );
       return { success: true, data: response };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Error cambiando contraseña' 
+      return {
+        success: false,
+        error: error.response?.data?.error || "Error cambiando contraseña",
       };
     }
   };
@@ -174,14 +194,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     getAccessToken,
     changePassword,
-    refreshAuthToken
+    refreshAuthToken,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;

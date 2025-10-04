@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
+import { Box, Typography } from "@mui/material";
 import Home from "../pages/Home";
 import NavBar from "../components/NavBar";
 import Catalogo from "../pages/Libros/Catalogo";
@@ -17,9 +18,10 @@ import Dashboard from "../admin/pages/Dashboard";
 // componentes de autores y categorías
 import AdminAutores from "../admin/pages/AdminAutores";
 import AdminCategorias from "../admin/pages/AdminCategorias";
-//Importar ProtectedRoute
+// Importar AdminLogin
+import AdminLogin from "../admin/components/AdminLogin";
+// Importar ProtectedRoute
 import ProtectedRoute from "../components/ProtectedRoute";
-import { Box, Typography } from "@mui/material";
 
 function AppRoutes() {
   const location = useLocation();
@@ -41,11 +43,14 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
 
+        {/* Ruta de login para administradores (pública) */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
         {/* Rutas de Administración - PROTEGIDAS */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <Dashboard />
               </AdminLayout>
@@ -55,7 +60,7 @@ function AppRoutes() {
         <Route
           path="/admin/libros"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <AdminLibros />
               </AdminLayout>
@@ -66,7 +71,7 @@ function AppRoutes() {
         <Route
           path="/admin/autores"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <AdminAutores />
               </AdminLayout>
@@ -76,7 +81,7 @@ function AppRoutes() {
         <Route
           path="/admin/categorias"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <AdminCategorias />
               </AdminLayout>

@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { Usuario, Cliente } from "../models/index.js";
+import { Usuario, Cliente, Administrador } from "../models/index.js";
 
 class AuthService {
   constructor() {
@@ -51,7 +51,7 @@ class AuthService {
     }
 
     // Hash de la contraseña
-    const saltRounds = 11;
+    const saltRounds = 12;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
     // Crear usuario
@@ -99,7 +99,7 @@ class AuthService {
   }
 
   // Login
-  async login(email, password) {
+  async login(email, password, isAdminLogin = false) {
     // Buscar usuario con su cliente
     const usuario = await Usuario.findOne({
       where: { email },
