@@ -72,7 +72,18 @@ export default function AdminLogin() {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container
+      component="main"
+      maxWidth={false}
+      disableGutters
+      sx={{
+        height: "100vh",
+        background: "linear-gradient(135deg, #006D77 0%, #00474E 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <Box
         sx={{
           height: "100vh",
@@ -80,7 +91,6 @@ export default function AdminLogin() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #006D77 0%, #00474E 100%)",
         }}
       >
         <Paper
@@ -179,7 +189,7 @@ export default function AdminLogin() {
 
           <Box sx={{ mt: 2, textAlign: "center" }}>
             <Typography variant="body2" color="text.secondary">
-              ¿Eres cliente?{" "}
+              ¿No sos administrador?{" "}
               <Button
                 component="a"
                 href="/"

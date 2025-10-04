@@ -23,9 +23,9 @@ function Catalogo() {
           url = `${url}?id_categoria=${id_categoria}`;
         }
         const response = await axios.get(url);
-        
+
         const fetchedLibros = response.data.libros || response.data;
-        
+
         // ordena alfabéticamente x título
         const sortedLibros = fetchedLibros.sort((a, b) => {
           if (a.titulo && b.titulo) {
@@ -36,7 +36,6 @@ function Catalogo() {
 
         // setea los libros ordenados en el estado
         setLibros(sortedLibros);
-        
       } catch (error) {
         console.error("Error al obtener los libros", error);
         setError(
@@ -113,7 +112,7 @@ function Catalogo() {
           </Typography>
         ) : (
           filteredLibros.map((libro) => (
-            <Grid key={libro.id} sx={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+            <Grid key={libro.id} sx={{xs:12, sm:6, md: 4, lg:3}}> 
               <LibroCard
                 id={libro.id}
                 titulo={libro.titulo}

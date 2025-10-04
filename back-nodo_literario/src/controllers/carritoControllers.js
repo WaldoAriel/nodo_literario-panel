@@ -54,25 +54,30 @@ const createCarrito = async (req, res) => {
   }
 };
 
+//función para calcular subtotal
+const calculateSubtotal = (cantidad, precioUnitario) => {
+  return cantidad * precioUnitario;
+};
+
 // Agregar un libro al carrito
 const addItemToCarrito = async (req, res) => {
   try {
-    const { id_carrito, id_libro, cantidad } = req.body;
+    const { id_carrito, id_libro, cantidad = 1 } = req.body; // 🆕 valor por defecto
 
-    const carrito = await Carrito.findByPk(id_carrito);
-
-    if (!carrito) {
-      return res.status(404).json({ error: "Carrito no encontrado" });
+    // Validar
+    if (cantidad <= 0) {
+      return res.status(400).json({ error: "La cantidad debe ser mayor a 0" });
     }
 
     const libro = await Libro.findByPk(id_libro);
-
     if (!libro || !libro.activa) {
       return res.status(404).json({ error: "Libro no encontrado o inactivo" });
     }
 
-    if (cantidad <= 0) {
-      return res.status(400).json({ error: "La cantidad debe ser mayor a 0" });
+    if (libro.stock < cantidad) {
+      return res.status(400).json({
+        error: `Stock insuficiente. Solo quedan ${libro.stock} unidades`,
+      });
     }
 
     // Verificar si ya existe este libro en el carrito
@@ -80,21 +85,24 @@ const addItemToCarrito = async (req, res) => {
       where: { id_carrito, id_libro },
     });
 
+    const nuevoPrecio = libro.precio; // Usar precio actual del libro
+    const nuevaCantidad = item ? item.cantidad + cantidad : cantidad;
+
     if (item) {
-      // Si ya existe, actualizamos la cantidad
-      item.cantidad += cantidad;
+      // Si existe, actualizamos
+      item.cantidad = nuevaCantidad;
+      item.precio_unitario = nuevoPrecio; // Actualizar precio por si cambió
+      item.subtotal = calculateSubtotal(nuevaCantidad, nuevoPrecio);
       await item.save();
     } else {
       // Si no existe, lo creamos
       item = await CarritoItem.create({
         id_carrito,
         id_libro,
-        cantidad,
-        precio_unitario: libro.precio,
-        subtotal: libro.precio * cantidad,
+        cantidad: nuevaCantidad,
+        precio_unitario: nuevoPrecio,
+        subtotal: calculateSubtotal(nuevaCantidad, nuevoPrecio),
       });
-
-      await carrito.$add("items", item); // para asociar el item al carrito
     }
 
     res.status(201).json(item);

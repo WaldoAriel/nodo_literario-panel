@@ -9,10 +9,10 @@ import {
 
 const router = Router();
 
-router.get("/api/carrito", getCarrito);
-router.post("/api/carrito", createCarrito);
-router.post("/api/carrito/agregar", addItemToCarrito);
-router.delete("/api/carrito/remover", removeItemFromCarrito);
-router.delete("/api/carrito/vaciar", clearCarrito);
+router.get("/carrito", getCarrito);
+router.post("/carrito", createCarrito);
+router.post("/carrito/agregar", addItemToCarrito);
+router.delete("/carrito/remover", removeItemFromCarrito);
+router.delete("/carrito/vaciar", clearCarrito);
 
 export default router;
