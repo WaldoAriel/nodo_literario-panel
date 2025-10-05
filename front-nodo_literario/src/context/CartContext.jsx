@@ -44,22 +44,30 @@ export function CartProvider({ children }) {
   // Traer o crear carrito
   const getOrCreateCart = async () => {
     try {
-      let carritoId = localStorage.getItem("carritoId");
+      let sessionId = localStorage.getItem("sessionId");
 
-      if (!carritoId) {
-        // Crear nuevo carrito
+      if (!sessionId) {
+        // Crear nuevo session ID
+        sessionId = generateSessionId();
+        localStorage.setItem("sessionId", sessionId);
+
+        console.log("🆕 Creando nuevo carrito con sessionId:", sessionId);
+
+        // Crear nuevo carrito con el session_id
         const response = await api.post("/carrito", {
-          session_id: generateSessionId(),
+          session_id: sessionId,
         });
 
         const nuevoCarrito = response.data;
-        carritoId = nuevoCarrito.id;
-        localStorage.setItem("carritoId", carritoId);
+        localStorage.setItem("carritoId", nuevoCarrito.id);
+        console.log("✅ Nuevo carrito creado:", nuevoCarrito.id);
+      } else {
+        console.log("🔍 Usando sessionId existente:", sessionId);
       }
 
-      return carritoId;
+      return sessionId;
     } catch (error) {
-      console.error("Error al obtener/crear carrito:", error);
+      console.error("❌ Error al obtener/crear carrito:", error);
       return null;
     }
   };
@@ -89,30 +97,48 @@ export function CartProvider({ children }) {
   const loadCart = async () => {
     try {
       setLoading(true);
-      const carritoId = await getOrCreateCart();
+      const sessionId = await getOrCreateCart();
 
-      if (carritoId) {
+      console.log("🔄 Cargando carrito con sessionId:", sessionId);
+
+      if (sessionId) {
         const response = await api.get(`/carrito`, {
           params: {
-            session_id: carritoId,
+            session_id: sessionId,
           },
         });
 
+        console.log("✅ Carrito cargado:", response.data);
         const carritoData = response.data;
         updateCartState(carritoData);
       }
     } catch (error) {
-      console.error("Error cargando carrito:", error);
+      console.error("❌ Error cargando carrito:", error);
+      // Si es error 404, podría significar que el carrito fue eliminado
+      // Podemos crear uno nuevo automáticamente
+      if (error.response?.status === 404) {
+        console.log("🔄 Carrito no encontrado, creando uno nuevo...");
+        localStorage.removeItem("sessionId"); // Forzar recreación
+        await loadCart(); // Recargar
+      }
     } finally {
       setLoading(false);
     }
   };
-
   // Agregar item al carrito
   const addToCart = async (libro, cantidad = 1) => {
     try {
       setLoading(true);
-      const carritoId = await getOrCreateCart();
+
+      // PRIMERO cargar el carrito para obtener el ID
+      await loadCart();
+      const carritoId = cart.carritoId;
+
+      console.log("🛒 Agregando al carrito:", {
+        carritoId: carritoId,
+        libroId: libro.id,
+        cantidad: cantidad,
+      });
 
       if (!carritoId) {
         throw new Error("No se pudo obtener el carrito");
@@ -124,6 +150,7 @@ export function CartProvider({ children }) {
         cantidad: cantidad,
       });
 
+      // Recargar el carrito para reflejar los cambios
       await loadCart();
       return { success: true };
     } catch (error) {
@@ -131,7 +158,6 @@ export function CartProvider({ children }) {
         "Error agregando al carrito:",
         error.response?.data?.error || error.message
       );
-      // Extrae el mensaje de error de la respuesta de Axios
       return {
         success: false,
         error: error.response?.data?.error || "Error de conexión",
@@ -145,7 +171,14 @@ export function CartProvider({ children }) {
   const removeFromCart = async (idLibro) => {
     try {
       setLoading(true);
-      const carritoId = await getOrCreateCart();
+
+      // Usar el ID del carrito del estado, no crear uno nuevo
+      const carritoId = cart.carritoId;
+
+      console.log("🗑️ Removiendo del carrito:", {
+        carritoId: carritoId,
+        libroId: idLibro,
+      });
 
       const response = await api.delete("/carrito/remover", {
         data: {
@@ -205,7 +238,11 @@ export function CartProvider({ children }) {
   const clearCart = async () => {
     try {
       setLoading(true);
-      const carritoId = await getOrCreateCart();
+
+      // Usar el ID del carrito del estado
+      const carritoId = cart.carritoId;
+
+      console.log("🧹 Vaciando carrito:", carritoId);
 
       const response = await api.delete("/carrito/vaciar", {
         data: {
@@ -213,7 +250,7 @@ export function CartProvider({ children }) {
         },
       });
 
-      // Si es exitoso, actualiza el estado local
+      // Actualizar estado local
       setCart({
         items: [],
         total: 0,

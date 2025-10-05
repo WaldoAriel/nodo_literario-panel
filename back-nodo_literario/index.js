@@ -34,11 +34,18 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors({ origin: "http://localhost:5173" }));
 
+// Agrega esto DESPUÉS de app.use(cors...) y ANTES de las rutas
+app.use((req, res, next) => {
+  console.log(`🌐 ${req.method} ${req.originalUrl}`);
+  next();
+});
+// TEMPORAL  PARA DEBUG ****
+
 app.use("/api", categoriaRoutes);
 app.use("/api", libroRoutes); 
 app.use("/api", mensajeRoutes);
 app.use("/api", clienteRoutes);
-app.use("/api", carritoRoutes);
+app.use("/api/carrito", carritoRoutes);
 app.use("/api", pedidoRoutes);
 app.use("/api", metodoPagoRoutes);
 app.use("/api", direccionRoutes);

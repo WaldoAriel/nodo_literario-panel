@@ -1,7 +1,7 @@
-import { Carrito, CarritoItem, Libro } from "../models/index.js";
+import { Carrito, CarritoItem, Libro, ImagenProducto } from "../models/index.js"; 
 
-// Obtener carrito por ID (por ejemplo, usando session_id o id_cliente)
-const getCarrito = async (req, res) => {
+// Obtener carrito por ID (por ejemplo, usando session_id o id_cliente) COMENTADO PARA DEBUG
+/* const getCarrito = async (req, res) => {
   try {
     const { id_cliente, session_id } = req.query;
 
@@ -29,7 +29,64 @@ const getCarrito = async (req, res) => {
     console.error("❌ Error al obtener carrito:", error);
     res.status(500).json({ error: "Error al obtener el carrito" });
   }
+}; */
+
+// **** DEBUG ****
+const getCarrito = async (req, res) => {
+  try {
+    console.log("🎯 GET /api/carrito LLAMADO");
+    console.log("📦 Query parameters:", req.query);
+    console.log("🔍 Session ID recibido:", req.query.session_id);
+    
+    const { id_cliente, session_id } = req.query;
+
+    if (!id_cliente && !session_id) {
+      console.log("❌ Error: No se recibió id_cliente ni session_id");
+      return res.status(400).json({
+        error: "Se requiere id_cliente o session_id",
+      });
+    }
+
+    console.log("🔎 Buscando carrito en la base de datos...");
+    
+    let carrito = await Carrito.findOne({
+      where: id_cliente ? { id_cliente } : { session_id },
+      include: [
+        {
+          model: CarritoItem,
+          as: 'items',
+          include: [
+            {
+              model: Libro,
+              as: 'libro',
+              include: [
+                {
+                  model: ImagenProducto,  // ← INCLUIR LAS IMÁGENES
+                  as: 'imagenes'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    console.log("📋 Resultado de búsqueda:", carrito ? `Carrito ID: ${carrito.id}` : "NO ENCONTRADO");
+
+    if (!carrito) {
+      console.log("❌ Carrito no encontrado en la BD");
+      return res.status(404).json({ error: "Carrito no encontrado" });
+    }
+
+    console.log("✅ Carrito encontrado con items:", carrito.items?.length || 0);
+    
+    res.json(carrito);
+  } catch (error) {
+    console.error("❌ Error al obtener carrito:", error);
+    res.status(500).json({ error: "Error al obtener el carrito" });
+  }
 };
+// FIN DEBUG
 
 // Crear un nuevo carrito
 const createCarrito = async (req, res) => {

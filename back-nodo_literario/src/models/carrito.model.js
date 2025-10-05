@@ -35,4 +35,16 @@ const Carrito = sequelize.define(
   }
 );
 
+// sacar de acá y poner  en el index
+Carrito.associate = function(models) {
+  Carrito.hasMany(models.CarritoItem, {
+    foreignKey: 'id_carrito',
+    as: 'items'
+  });
+  Carrito.belongsTo(models.Cliente, {
+    foreignKey: 'id_cliente',
+    as: 'cliente'
+  });
+};
+
 export default Carrito;

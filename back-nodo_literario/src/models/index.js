@@ -180,9 +180,6 @@ MetodoPago.hasMany(Pedido, {
   as: "pedidos",
 });
 
-// ===============================================
-// Exportación de Modelos
-// ===============================================
 
 export {
   sequelize,
