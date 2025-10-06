@@ -7,9 +7,12 @@ import {
   CircularProgress,
   CardMedia,
   Chip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import { useCart } from "../../context/CartContext"; // 👈 IMPORTAR EL HOOK
 
 function DetalleLibro() {
   const { id } = useParams();
@@ -17,6 +20,14 @@ function DetalleLibro() {
   const [imagenPrincipal, setImagenPrincipal] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [snackbar, setSnackbar] = useState({ 
+    open: false, 
+    message: "", 
+    severity: "success" 
+  });
+
+  // 👇 USAR EL HOOK DEL CARRITO
+  const { addToCart, isInCart, getItemQuantity } = useCart();
 
   useEffect(() => {
     const fetchLibro = async () => {
@@ -52,6 +63,31 @@ function DetalleLibro() {
 
   const cambiarImagen = (nuevaImagen) => {
     setImagenPrincipal(nuevaImagen);
+  };
+
+  // 👇 FUNCIÓN PARA AGREGAR AL CARRITO
+  const handleAddToCart = async () => {
+    if (!libro) return;
+
+    const result = await addToCart(libro, 1);
+    
+    if (result.success) {
+      setSnackbar({
+        open: true,
+        message: `"${libro.titulo}" agregado al carrito`,
+        severity: "success"
+      });
+    } else {
+      setSnackbar({
+        open: true,
+        message: result.error || "Error al agregar al carrito",
+        severity: "error"
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   if (loading) {
@@ -103,10 +139,13 @@ function DetalleLibro() {
     ? precioOriginal * (1 - (libro.descuento || 0) / 100)
     : precioOriginal;
 
+  // 👇 VERIFICAR SI EL LIBRO ESTÁ EN EL CARRITO
+  const libroEnCarrito = isInCart(libro.id);
+  const cantidadEnCarrito = getItemQuantity(libro.id);
+
   return (
     <Box sx={{ p: 4 }}>
       {/* Encabezado con título */}
-
       <Box
         sx={{
           display: "flex",
@@ -148,19 +187,20 @@ function DetalleLibro() {
           {/* Galería de miniaturas */}
           {libro.imagenes && libro.imagenes.length > 1 && (
             <Box
-              sx={
-                {
-                  /* ... */
-                }
-              }
+              sx={{
+                display: "flex",
+                gap: 2,
+                flexWrap: "wrap",
+                justifyContent: "center"
+              }}
             >
               {libro.imagenes
-                .filter((img) => img.urlImagen) // Filtrar imágenes válidas
+                .filter((img) => img.urlImagen)
                 .map((imagen, index) => (
                   <Box
                     key={imagen.id}
                     component="img"
-                    src={imagen.urlImagen || "/placeholder.jpg"} // Fallback por si la URL está vacía
+                    src={imagen.urlImagen || "/placeholder.jpg"}
                     alt={`Vista ${index + 1} de ${libro.titulo}`}
                     onClick={() => cambiarImagen(imagen.urlImagen)}
                     sx={{
@@ -199,10 +239,18 @@ function DetalleLibro() {
             variant="h3"
             component="h1"
             gutterBottom
-            sx={{ mb: 4, textAlign: "center", p:3, backgroundColor: "primary.light", borderTopLeftRadius:15, borderTopRightRadius:15}}
+            sx={{ 
+              mb: 4, 
+              textAlign: "center", 
+              p: 3, 
+              backgroundColor: "primary.light", 
+              borderTopLeftRadius: 15, 
+              borderTopRightRadius: 15 
+            }}
           >
             {libro.titulo}
           </Typography>
+          
           {/* Autor */}
           <Typography variant="h5" color="text.secondary" gutterBottom>
             {libro.autores && libro.autores.length > 0
@@ -226,7 +274,7 @@ function DetalleLibro() {
               variant="outlined"
             />
             <Chip
-              label= {`Editorial ${libro.editorial?.nombre || "Sin editorial"}`}
+              label={`Editorial ${libro.editorial?.nombre || "Sin editorial"}`}
               color="info"
               variant="outlined"
             />
@@ -290,10 +338,18 @@ function DetalleLibro() {
                 : "✗ Sin stock"}
             </Typography>
 
+            {/* 👇 MOSTRAR INFORMACIÓN DEL CARRITO SI ESTÁ AGREGADO */}
+            {libroEnCarrito && (
+              <Typography variant="body2" color="primary" sx={{ fontStyle: "italic" }}>
+                ✓ Ya tienes {cantidadEnCarrito} {cantidadEnCarrito === 1 ? 'unidad' : 'unidades'} en el carrito
+              </Typography>
+            )}
+
             <Button
               variant="contained"
               size="large"
               disabled={libro.stock === 0}
+              onClick={handleAddToCart} // 👈 AGREGAR EL ONCLICK
               sx={{
                 minWidth: "200px",
                 fontSize: "1.1rem",
@@ -305,6 +361,22 @@ function DetalleLibro() {
           </Box>
         </Box>
       </Box>
+
+      {/* 👇 SNACKBAR PARA MOSTRAR MENSAJES */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

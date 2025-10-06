@@ -214,25 +214,6 @@ function Carrito() {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Función para obtener la imagen del libro (la puedes eliminar si quieres, ahora está en CartItem)
-  const getImagenLibro = (libro) => {
-    if (!libro) return null;
-
-    if (libro.imagenes && libro.imagenes.length > 0) {
-      return libro.imagenes[0].urlImagen;
-    }
-
-    return null;
-  };
-
-  // Debug: ver la estructura de los items
-/*   React.useEffect(() => {
-    if (cart.items.length > 0) {
-      console.log("📋 Estructura completa del carrito:", cart);
-      console.log("🖼️ Primer libro con imágenes:", cart.items[0].libro);
-    }
-  }, [cart.items]); */
-
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
