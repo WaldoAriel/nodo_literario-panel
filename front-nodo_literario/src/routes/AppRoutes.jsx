@@ -22,6 +22,8 @@ import AdminCategorias from "../admin/pages/AdminCategorias";
 import AdminLogin from "../admin/components/AdminLogin";
 // Importar ProtectedRoute
 import ProtectedRoute from "../components/ProtectedRoute";
+// 👇 IMPORTAR EL COMPONENTE DE NOTIFICACIONES
+import NotificacionesSocket from "../components/NotificacionesSocket";
 
 function AppRoutes() {
   const location = useLocation();
@@ -30,6 +32,10 @@ function AppRoutes() {
   return (
     <>
       {!esRutaAdmin && <NavBar />}
+      
+      {/* 👇 AGREGAR NOTIFICACIONES - Aparecerá en TODAS las rutas */}
+      <NotificacionesSocket />
+      
       <Routes>
         {/* Rutas Públicas */}
         <Route path="/" element={<Home />} />
@@ -90,10 +96,10 @@ function AppRoutes() {
         />
 
         {/* Ruta para páginas no encontradas */}
-        <Route 
-          path="*" 
+        <Route
+          path="*"
           element={
-            <Box sx={{ textAlign: 'center', padding: 4, marginTop: 4 }}>
+            <Box sx={{ textAlign: "center", padding: 4, marginTop: 4 }}>
               <Typography variant="h4" gutterBottom>
                 Página No Encontrada
               </Typography>
@@ -101,7 +107,7 @@ function AppRoutes() {
                 La página que buscas no existe.
               </Typography>
             </Box>
-          } 
+          }
         />
       </Routes>
       {!esRutaAdmin && <Footer />}

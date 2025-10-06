@@ -201,8 +201,41 @@ const createLibro = async (req, res) => {
       await LibroAutor.bulkCreate(relacionesAutores, { transaction });
     }
 
+    // 👇 NUEVO: Obtener el libro completo con relaciones para la notificación
+    const libroCompleto = await Libro.findByPk(nuevaLibro.id, {
+      include: [
+        {
+          model: Autor,
+          as: 'autores',
+          through: { attributes: [] }
+        },
+        {
+          model: ImagenProducto,
+          as: 'imagenes'
+        }
+      ],
+      transaction
+    });
+
     await transaction.commit();
-    res.status(201).json(nuevaLibro);
+
+    // Emitir notificación DESPUÉS del commit exitoso
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('nuevo-libro', {
+        id: libroCompleto.id,
+        titulo: libroCompleto.titulo,
+        autores: libroCompleto.autores || [{ nombre: 'Autor', apellido: 'Desconocido' }],
+        precio: parseFloat(libroCompleto.precio).toLocaleString('es-AR'),
+        imagen: libroCompleto.imagenes?.[0]?.urlImagen || '/placeholder-book.jpg',
+        fecha: new Date().toLocaleTimeString('es-AR')
+      });
+
+      console.log('📢 Notificación enviada para nuevo libro:', libroCompleto.titulo);
+    }
+
+    res.status(201).json(libroCompleto);
+
   } catch (error) {
     await transaction.rollback();
     console.error("❌ Error al crear libro:", error);
@@ -283,10 +316,10 @@ const updateLibro = async (req, res) => {
 
       const tieneImagenesExistentes = imagenesExistentes.length > 0;
 
-      // Crear las nuevas imágenes
+      // Crear nuevas imágenes
       const imagenesPromises = imagenes.map((imagen, index) => {
         const urlImagen = `/uploads/libros/${imagen.filename}`;
-        // Si no hay imágenes existentes, la primera nueva será portada
+        // Si no hay imágenes, la primera nueva va a ser portada
         const esPortada = index === 0 && !tieneImagenesExistentes;
         return ImagenProducto.create(
           {
@@ -346,20 +379,5 @@ const deleteLibro = async (req, res) => {
   }
 };
 
-// ❌ Eliminamos este controlador, ya no es necesario
-// const uploadImage = (req, res) => {
-//  try {
-//   if (!req.file) {
-//    return res.status(400).json({ error: "No se subió ningún archivo" });
-//   }
-//   res.json({
-//    message: "Imagen subida correctamente",
-//    filename: req.file.filename,
-//    path: `/uploads/libros/${req.file.filename}`,
-//   });
-//  } catch (error) {
-//   res.status(500).json({ error: error.message });
-//  }
-// };
 
 export { getAllLibros, getLibroById, createLibro, updateLibro, deleteLibro };
