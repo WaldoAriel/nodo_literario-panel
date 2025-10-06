@@ -5,6 +5,7 @@ import {
   addItemToCarrito,
   removeItemFromCarrito,
   clearCarrito,
+  actualizarCantidad  
 } from "../controllers/carritoControllers.js";
 
 const router = Router();
@@ -12,6 +13,9 @@ const router = Router();
 router.get("/", getCarrito);           // GET /api/carrito
 router.post("/", createCarrito);       // POST /api/carrito
 router.post("/agregar", addItemToCarrito);     // POST /api/carrito/agregar
+
+router.put('/actualizar-cantidad', actualizarCantidad);
+
 router.delete("/remover", removeItemFromCarrito); // DELETE /api/carrito/remover
 router.delete("/vaciar", clearCarrito);        // DELETE /api/carrito/vaciar
 

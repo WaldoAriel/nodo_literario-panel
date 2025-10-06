@@ -1,4 +1,10 @@
-import { Carrito, CarritoItem, Libro, ImagenProducto } from "../models/index.js"; 
+import {
+  Carrito,
+  CarritoItem,
+  Libro,
+  ImagenProducto,
+  Autor
+} from "../models/index.js";
 
 // Obtener carrito por ID (por ejemplo, usando session_id o id_cliente) COMENTADO PARA DEBUG
 /* const getCarrito = async (req, res) => {
@@ -31,13 +37,98 @@ import { Carrito, CarritoItem, Libro, ImagenProducto } from "../models/index.js"
   }
 }; */
 
+// FUNCIÓN actualizarCantidad - DEBE ESTAR EN EL NIVEL SUPERIOR
+const actualizarCantidad = async (req, res) => {
+  try {
+    const { id_carrito, id_libro, cantidad } = req.body;
+
+    // Validaciones básicas
+    if (!id_carrito || !id_libro || !cantidad) {
+      return res.status(400).json({
+        error: "Datos incompletos: id_carrito, id_libro y cantidad son requeridos",
+      });
+    }
+
+    if (cantidad <= 0) {
+      return res.status(400).json({
+        error: "La cantidad debe ser mayor a 0",
+      });
+    }
+
+    // Buscar el libro para verificar stock
+    const libro = await Libro.findByPk(id_libro);
+    if (!libro) {
+      return res.status(404).json({
+        error: "Libro no encontrado",
+      });
+    }
+
+    // Validar stock disponible
+    if (libro.stock < cantidad) {
+      return res.status(400).json({
+        error: `Stock insuficiente. Solo quedan ${libro.stock} unidades disponibles`,
+        stockDisponible: libro.stock
+      });
+    }
+
+    // Buscar el item en el carrito
+    const carritoItem = await CarritoItem.findOne({
+      where: {
+        id_carrito,
+        id_libro,
+      },
+    });
+
+    if (!carritoItem) {
+      return res.status(404).json({
+        error: "Item no encontrado en el carrito",
+      });
+    }
+
+    // Actualizar cantidad
+    await carritoItem.update({
+      cantidad: cantidad,
+      subtotal: carritoItem.precio_unitario * cantidad,
+    });
+
+    // Recargar el carrito completo para enviar respuesta
+    const carritoActualizado = await Carrito.findByPk(id_carrito, {
+      include: [
+        {
+          model: CarritoItem,
+          as: "items",
+          include: [
+            {
+              model: Libro,
+              as: "libro",
+              include: [
+                {
+                  model: Autor,
+                  as: "autores",
+                  through: { attributes: [] },
+                },
+                {
+                  model: ImagenProducto,
+                  as: "imagenes",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    res.json(carritoActualizado);
+  } catch (error) {
+    console.error("Error actualizando cantidad:", error);
+    res.status(500).json({
+      error: "Error interno del servidor al actualizar cantidad",
+    });
+  }
+};
 // **** DEBUG ****
 const getCarrito = async (req, res) => {
   try {
-    console.log("🎯 GET /api/carrito LLAMADO");
-    console.log("📦 Query parameters:", req.query);
-    console.log("🔍 Session ID recibido:", req.query.session_id);
-    
     const { id_cliente, session_id } = req.query;
 
     if (!id_cliente && !session_id) {
@@ -47,39 +138,38 @@ const getCarrito = async (req, res) => {
       });
     }
 
-    console.log("🔎 Buscando carrito en la base de datos...");
-    
     let carrito = await Carrito.findOne({
       where: id_cliente ? { id_cliente } : { session_id },
       include: [
         {
           model: CarritoItem,
-          as: 'items',
+          as: "items",
           include: [
             {
               model: Libro,
-              as: 'libro',
+              as: "libro",
               include: [
                 {
-                  model: ImagenProducto,  // ← INCLUIR LAS IMÁGENES
-                  as: 'imagenes'
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  model: ImagenProducto,
+                  as: "imagenes",
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
-    console.log("📋 Resultado de búsqueda:", carrito ? `Carrito ID: ${carrito.id}` : "NO ENCONTRADO");
+    console.log(
+      "📋 Resultado de búsqueda:",
+      carrito ? `Carrito ID: ${carrito.id}` : "NO ENCONTRADO"
+    );
 
     if (!carrito) {
       console.log("❌ Carrito no encontrado en la BD");
       return res.status(404).json({ error: "Carrito no encontrado" });
     }
 
-    console.log("✅ Carrito encontrado con items:", carrito.items?.length || 0);
-    
     res.json(carrito);
   } catch (error) {
     console.error("❌ Error al obtener carrito:", error);
@@ -221,4 +311,5 @@ export {
   addItemToCarrito,
   removeItemFromCarrito,
   clearCarrito,
+  actualizarCantidad,
 };
