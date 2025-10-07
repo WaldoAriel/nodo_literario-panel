@@ -94,7 +94,7 @@ async function startServer() {
 
     await sequelize.sync({ force: false });
 
-    // Cambiar app.listen por httpServer.listen para usarSocket
+    // se cambia  app.listen por httpServer.listen para usarSocket
     /*     app.listen(PORT, () => {
       console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     }); */
