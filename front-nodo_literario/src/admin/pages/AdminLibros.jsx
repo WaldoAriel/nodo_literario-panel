@@ -430,8 +430,8 @@ export default function AdminLibros() {
                           .join(", ")
                       : "Sin autor"}
                   </TableCell>
-                  <TableCell>${libro.precio}</TableCell>
-                  <TableCell>{libro.stock}</TableCell>
+                  <TableCell align="right">${libro.precio}</TableCell>
+                  <TableCell align="right">{libro.stock}</TableCell>
                   <TableCell>
                     {libro.categoria?.nombre || "Sin categoría"}
                   </TableCell>

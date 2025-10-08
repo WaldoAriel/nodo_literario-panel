@@ -15,6 +15,16 @@ function FilterBar({ libros, onFilter }) {
   const [selectedAutor, setSelectedAutor] = useState("");
   const [priceRange, setPriceRange] = useState("");
 
+  // Función para normalizar texto (quitar tildes y caracteres especiales)
+  const normalizarTexto = (texto) => {
+    if (!texto) return '';
+    return texto
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Elimina tildes
+      .replace(/[^a-z0-9\s]/g, ""); // Elimina caracteres especiales (opcional)
+  };
+
   // Extraer autores únicos para el filtro
   const autoresUnicos = [...new Set(libros.map((p) => p.autor))];
 
@@ -23,9 +33,12 @@ function FilterBar({ libros, onFilter }) {
     let filtered = [...libros];
 
     if (searchTerm) {
-      filtered = filtered.filter((p) =>
-        p.titulo.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const terminoNormalizado = normalizarTexto(searchTerm);
+      
+      filtered = filtered.filter((p) => {
+        const tituloNormalizado = normalizarTexto(p.titulo);
+        return tituloNormalizado.includes(terminoNormalizado);
+      });
     }
 
     if (selectedAutor) {
@@ -88,6 +101,7 @@ function FilterBar({ libros, onFilter }) {
             startAdornment: <Search sx={{ mr: 1, color: "action.active" }} />,
           }}
           sx={{ flexGrow: 1 }}
+          placeholder="Ej: Hamlet"
         />
 
         {/* Filtro por autor */}
@@ -135,12 +149,25 @@ function FilterBar({ libros, onFilter }) {
         </Button>
       </Stack>
 
-      {/* Chips de filtros activos (opcional) */}
+      {/* Chips de filtros activos */}
       <Box sx={{ mt: 2 }}>
+        {searchTerm && (
+          <Chip
+            label={`Búsqueda: "${searchTerm}"`}
+            onDelete={() => {
+              setSearchTerm("");
+              applyFilters();
+            }}
+            sx={{ mr: 1, mb: 1 }}
+          />
+        )}
         {selectedAutor && (
           <Chip
             label={`Autor: ${selectedAutor}`}
-            onDelete={() => setSelectedAutor("")}
+            onDelete={() => {
+              setSelectedAutor("");
+              applyFilters();
+            }}
             sx={{ mr: 1, mb: 1 }}
           />
         )}
@@ -153,11 +180,21 @@ function FilterBar({ libros, onFilter }) {
                 "mas-15k": "Más de $15k",
               }[priceRange]
             }`}
-            onDelete={() => setPriceRange("")}
+            onDelete={() => {
+              setPriceRange("");
+              applyFilters();
+            }}
             sx={{ mr: 1, mb: 1 }}
           />
         )}
       </Box>
+
+      {/* Mensaje de ayuda */}
+      {searchTerm && (
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          💡 La búsqueda ignora tildes y mayúsculas
+        </Typography>
+      )}
     </Box>
   );
 }

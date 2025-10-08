@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CircularProgress, Grid, Typography } from "@mui/material";
+import { CircularProgress, Grid, Typography, Box } from "@mui/material";
 import LibroCard from "../../components/LibroCard";
 import FilterBar from "/src/components/FilterBar";
 import axios from "axios";
@@ -54,8 +54,8 @@ function Catalogo() {
 
   if (loading) {
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -67,14 +67,14 @@ function Catalogo() {
         <Typography variant="h6" sx={{ ml: 2 }}>
           Cargando los libros...
         </Typography>
-      </div>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -87,32 +87,45 @@ function Catalogo() {
         <Typography variant="h6" sx={{ ml: 2 }}>
           {error}
         </Typography>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div style={{ backgroundColor: "#efefef", minHeight: "100vh" }}>
+    <Box sx={{ backgroundColor: "#efefef", minHeight: "100vh" }}>
       {/* Barra de filtros */}
       <FilterBar libros={libros} onFilter={setFilteredLibros} />
       <Categorias />
 
+      {/* 👇 GRID CORREGIDO */}
       <Grid
         container
         spacing={3}
         sx={{
           p: 4,
-          display: "flex",
-          justifyContent: "center",
+          justifyContent: { xs: "center", sm: "flex-start" }
         }}
       >
         {filteredLibros.length === 0 && !loading && !error ? (
-          <Typography variant="h6" color="textSecondary" sx={{ mt: 4 }}>
-            No se encontraron libros en esta categoría
-          </Typography>
+          <Grid item xs={12}>
+            <Typography variant="h6" color="textSecondary" sx={{ mt: 4, textAlign: "center" }}>
+              No se encontraron libros en esta categoría
+            </Typography>
+          </Grid>
         ) : (
           filteredLibros.map((libro) => (
-            <Grid key={libro.id} sx={{xs:12, sm:6, md: 4, lg:3}}> 
+            <Grid 
+              key={libro.id} 
+              item 
+              xs={12} 
+              sm={6} 
+              md={4} 
+              lg={3}
+              sx={{
+                display: "flex",
+                justifyContent: "center"
+              }}
+            > 
               <LibroCard
                 id={libro.id}
                 titulo={libro.titulo}
@@ -127,7 +140,7 @@ function Catalogo() {
           ))
         )}
       </Grid>
-    </div>
+    </Box>
   );
 }
 

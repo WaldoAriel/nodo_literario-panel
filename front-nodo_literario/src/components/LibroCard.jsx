@@ -10,7 +10,7 @@ import {
   Box,
   IconButton,
   Snackbar,
-  Alert
+  Alert,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -26,7 +26,11 @@ function LibroCard({
   oferta,
   descuento = 0,
 }) {
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const { addToCart, isInCart, loading } = useCart();
   const precioFinal = oferta ? precio * (1 - descuento / 100) : precio;
 
@@ -36,24 +40,24 @@ function LibroCard({
     const libro = {
       id,
       titulo,
-      imagen, 
+      imagen,
       precio: precioFinal,
-      stock
+      stock,
     };
 
     const result = await addToCart(libro, 1);
-    
+
     if (result.success) {
       setSnackbar({
         open: true,
         message: `"${titulo}" agregado al carrito`,
-        severity: "success"
+        severity: "success",
       });
     } else {
       setSnackbar({
         open: true,
         message: result.error || "Error al agregar al carrito",
-        severity: "error"
+        severity: "error",
       });
     }
   };
@@ -103,7 +107,7 @@ function LibroCard({
             }}
           />
         )}
-        
+
         {/* stock */}
         {stock <= 8 && (
           <Chip
@@ -116,7 +120,9 @@ function LibroCard({
               right: 10,
               zIndex: 1,
               backgroundColor:
-                stock === 0 ? "rgba(244, 67, 54, 0.7)" : "rgba(255, 152, 0, 0.7)",
+                stock === 0
+                  ? "rgba(244, 67, 54, 0.7)"
+                  : "rgba(255, 152, 0, 0.7)",
             }}
           />
         )}
@@ -146,7 +152,7 @@ function LibroCard({
               objectFit: "contain",
             }}
           />
-          
+
           {/* Botón rápido de carrito superpuesto */}
           {stock > 0 && (
             <IconButton
@@ -158,12 +164,12 @@ function LibroCard({
                 right: 8,
                 backgroundColor: "primary.main",
                 color: "white",
-                '&:hover': {
+                "&:hover": {
                   backgroundColor: "primary.dark",
                 },
-                '&:disabled': {
+                "&:disabled": {
                   backgroundColor: enCarrito ? "success.main" : "grey.400",
-                }
+                },
               }}
               size="small"
             >
@@ -172,100 +178,119 @@ function LibroCard({
           )}
         </Box>
 
-        <CardContent sx={{ flexGrow: 1 }}>
-          <Typography
-            gutterBottom
-            variant="h6"
-            component="h3"
-            sx={{
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              minHeight: "64px",
-              textAlign: "left",
-            }}
-          >
-            {titulo}
-          </Typography>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 1.5, textAlign: "left" }}
-          >
-            {autor}
-          </Typography>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              mb: 2,
-              flexWrap: "wrap",
-              gap: 1,
-            }}
-          >
-            {oferta && (
-              <Typography
-                variant="body2"
-                sx={{
-                  textDecoration: "line-through",
-                  color: "text.disabled",
-                  mr: 1,
-                }}
-              >
-                ${precio.toLocaleString("es-AR")}
-              </Typography>
-            )}
-
+        <CardContent
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box>
             <Typography
+              gutterBottom
               variant="h6"
+              component="h3"
               sx={{
-                fontWeight: "bold",
-                color: "primary.main",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                minHeight: "64px",
+                textAlign: "left",
               }}
             >
-              ${precioFinal.toLocaleString("es-AR")}
+              {titulo}
             </Typography>
 
-            {precio > 17000 && (
-              <Chip label="ENVÍO GRATIS" color="success" size="small" />
-            )}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 1.5, textAlign: "left" }}
+            >
+              {autor}
+            </Typography>
+          </Box>
+
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 2,
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              {oferta && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    textDecoration: "line-through",
+                    color: "text.disabled",
+                    mr: 1,
+                  }}
+                >
+                  ${precio.toLocaleString("es-AR")}
+                </Typography>
+              )}
+
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: "primary.main",
+                }}
+              >
+                ${precioFinal.toLocaleString("es-AR")}
+              </Typography>
+
+              {precio > 17000 && (
+                <Chip label="ENVÍO GRATIS" color="success" size="small" />
+              )}
+            </Box>
           </Box>
 
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant={enCarrito ? "outlined" : "contained"}
-              fullWidth
-              onClick={handleAddToCart}
-              disabled={stock === 0 || loading}
-              startIcon={enCarrito ? <ShoppingCart /> : <AddShoppingCart />}
-              sx={{
-                backgroundColor: enCarrito ? "transparent" : "primary.main",
-                color: enCarrito ? "primary.main" : "white",
-                borderColor: enCarrito ? "primary.main" : "transparent",
-                '&:hover': {
-                  backgroundColor: enCarrito ? "primary.light" : "primary.dark",
-                  color: enCarrito ? "white" : "white",
-                }
-              }}
-            >
-              {stock === 0 ? "SIN STOCK" : enCarrito ? "EN CARRITO" : "AGREGAR"}
-            </Button>
-            
-            <Button
-              variant="outlined"
-              component={Link}
-              to={`/libro/${id}`}
-              sx={{
-                minWidth: 'auto',
-                px: 2
-              }}
-            >
-              👁️
-            </Button>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant={enCarrito ? "outlined" : "contained"}
+                fullWidth
+                onClick={handleAddToCart}
+                disabled={stock === 0 || loading}
+                startIcon={enCarrito ? <ShoppingCart /> : <AddShoppingCart />}
+                sx={{
+                  backgroundColor: enCarrito ? "transparent" : "primary.main",
+                  color: enCarrito ? "primary.main" : "white",
+                  borderColor: enCarrito ? "primary.main" : "transparent",
+                  "&:hover": {
+                    backgroundColor: enCarrito
+                      ? "primary.light"
+                      : "primary.dark",
+                    color: enCarrito ? "white" : "white",
+                  },
+                }}
+              >
+                {stock === 0
+                  ? "SIN STOCK"
+                  : enCarrito
+                  ? "EN CARRITO"
+                  : "AGREGAR"}
+              </Button>
+
+              <Button
+                variant="outlined"
+                component={Link}
+                to={`/libro/${id}`}
+                sx={{
+                  minWidth: "auto",
+                  px: 2,
+                }}
+              >
+                👁️‍🗨️
+              </Button>
+            </Box>
           </Box>
         </CardContent>
       </Card>
@@ -274,12 +299,12 @@ function LibroCard({
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
+        <Alert
+          onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbar.message}
         </Alert>
