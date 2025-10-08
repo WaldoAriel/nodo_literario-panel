@@ -28,6 +28,7 @@ import {
   ListItemText,
   Snackbar,
   Alert,
+  Chip,
   Avatar,
   Box as MuiBox,
 } from "@mui/material";
@@ -206,6 +207,9 @@ export default function AdminLibros() {
     setLoading(true);
     try {
       const response = await libroService.getLibros(page, 4);
+
+      console.log("📚 Datos de libros recibidos:", response.data.libros); // DEBUG
+
       setLibros(response.data.libros);
       setTotalPaginas(response.data.pagination.totalPages);
       setPaginaActual(page);
@@ -410,6 +414,7 @@ export default function AdminLibros() {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>Portada</TableCell>
               <TableCell>Título</TableCell>
               <TableCell>Autor</TableCell>
               <TableCell>Precio</TableCell>
@@ -422,7 +427,89 @@ export default function AdminLibros() {
             {libros && libros.length > 0 ? (
               libros.map((libro) => (
                 <TableRow key={libro.id}>
-                  <TableCell>{libro.titulo}</TableCell>
+                  {/* 👇 NUEVA CELDA CON LA IMAGEN */}
+                  <TableCell>
+                    {libro.imagenes && libro.imagenes.length > 0 ? (
+                      <Box
+                        sx={{
+                          width: 60,
+                          height: 80,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#f5f5f5",
+                          borderRadius: 1,
+                          overflow: "hidden",
+                          border: "1px solid #e0e0e0",
+                        }}
+                      >
+                        <img
+                          src={libro.imagenes[0].urlImagen}
+                          alt={`Portada de ${libro.titulo}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextSibling.style.display = "flex";
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            display: "none",
+                            width: "100%",
+                            height: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#e0e0e0",
+                            color: "#666",
+                            fontSize: "0.75rem",
+                            textAlign: "center",
+                          }}
+                        >
+                          📚
+                          <br />
+                          Sin imagen
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 60,
+                          height: 80,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#e0e0e0",
+                          borderRadius: 1,
+                          color: "#666",
+                          fontSize: "0.75rem",
+                          textAlign: "center",
+                        }}
+                      >
+                        📚
+                        <br />
+                        Sin imagen
+                      </Box>
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography variant="body2" fontWeight="medium">
+                      {libro.titulo}
+                    </Typography>
+                    {libro.oferta && (
+                      <Chip
+                        label="OFERTA"
+                        size="small"
+                        color="secondary"
+                        sx={{ mt: 0.5, height: 20, fontSize: "0.7rem" }}
+                      />
+                    )}
+                  </TableCell>
+
                   <TableCell>
                     {libro.autores && libro.autores.length > 0
                       ? libro.autores
@@ -430,16 +517,77 @@ export default function AdminLibros() {
                           .join(", ")
                       : "Sin autor"}
                   </TableCell>
-                  <TableCell align="right">${libro.precio}</TableCell>
-                  <TableCell align="right">{libro.stock}</TableCell>
-                  <TableCell>
-                    {libro.categoria?.nombre || "Sin categoría"}
+
+                  <TableCell align="right">
+                    <Box>
+                      {libro.oferta ? (
+                        <>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textDecoration: "line-through",
+                              color: "text.secondary",
+                              fontSize: "0.8rem",
+                            }}
+                          >
+                            ${libro.precio}
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            color="error.main"
+                            fontWeight="bold"
+                          >
+                            $
+                            {(
+                              libro.precio *
+                              (1 - (libro.descuento || 0) / 100)
+                            ).toFixed(2)}
+                          </Typography>
+                        </>
+                      ) : (
+                        <Typography variant="body1" fontWeight="medium">
+                          ${libro.precio}
+                        </Typography>
+                      )}
+                    </Box>
                   </TableCell>
+
+                  <TableCell align="right">
+                    <Chip
+                      label={libro.stock}
+                      size="small"
+                      color={
+                        libro.stock > 10
+                          ? "success"
+                          : libro.stock > 0
+                          ? "warning"
+                          : "error"
+                      }
+                      variant={libro.stock === 0 ? "outlined" : "filled"}
+                    />
+                  </TableCell>
+
                   <TableCell>
-                    <IconButton onClick={() => handleOpenModal(libro)}>
+                    <Chip
+                      label={libro.categoria?.nombre || "Sin categoría"}
+                      size="small"
+                      variant="outlined"
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <IconButton
+                      onClick={() => handleOpenModal(libro)}
+                      size="small"
+                      color="primary"
+                    >
                       <Edit />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(libro.id)}>
+                    <IconButton
+                      onClick={() => handleDelete(libro.id)}
+                      size="small"
+                      color="error"
+                    >
                       <Delete />
                     </IconButton>
                   </TableCell>
@@ -447,7 +595,7 @@ export default function AdminLibros() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   No hay libros disponibles
                 </TableCell>
               </TableRow>
