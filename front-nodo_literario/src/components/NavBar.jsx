@@ -100,15 +100,13 @@ function NavBar() {
             component={Link}
             to={item.path}
             sx={{
-              "&:hover": {
-                backgroundColor: "rgba(0, 0, 0, 0.04)",
-              },
               color: "inherit",
               textDecoration: "none",
               borderLeft: '3px solid transparent',
               '&:hover': {
                 borderLeft: '3px solid',
                 borderColor: 'primary.main',
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
               }
             }}
           >

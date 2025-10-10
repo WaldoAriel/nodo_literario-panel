@@ -50,10 +50,15 @@ const NotificacionesSocket = () => {
 
   const handleVerLibro = () => {
     if (notificacion) {
-      window.open(`/libros/${notificacion.id}`, "_blank");
+      window.open(`/libro/${notificacion.id}`, "_blank");
     }
     setOpen(false);
   };
+
+  const autor = notificacion?.autores?.[0];
+  const nombreCompletoAutor = autor
+    ? `${autor.nombre || ""} ${autor.apellido || ""}`.trim() || "Autor desconocido"
+    : "Autor desconocido";
 
   return (
     <Snackbar
@@ -118,7 +123,7 @@ const NotificacionesSocket = () => {
             </Typography>
             
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              por {notificacion?.autores?.[0]?.nombre || "Autor desconocido"}
+              por {nombreCompletoAutor}
             </Typography>
             
             <Typography variant="h6" color="success.main" gutterBottom>

@@ -429,71 +429,21 @@ export default function AdminLibros() {
                 <TableRow key={libro.id}>
                   {/* 👇 NUEVA CELDA CON LA IMAGEN */}
                   <TableCell>
-                    {libro.imagenes && libro.imagenes.length > 0 ? (
-                      <Box
-                        sx={{
-                          width: 60,
-                          height: 80,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#f5f5f5",
-                          borderRadius: 1,
-                          overflow: "hidden",
-                          border: "1px solid #e0e0e0",
-                        }}
-                      >
-                        <img
-                          src={libro.imagenes[0].urlImagen}
-                          alt={`Portada de ${libro.titulo}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextSibling.style.display = "flex";
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            display: "none",
-                            width: "100%",
-                            height: "100%",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "#e0e0e0",
-                            color: "#666",
-                            fontSize: "0.75rem",
-                            textAlign: "center",
-                          }}
-                        >
-                          📚
-                          <br />
-                          Sin imagen
-                        </Box>
-                      </Box>
-                    ) : (
-                      <Box
-                        sx={{
-                          width: 60,
-                          height: 80,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#e0e0e0",
-                          borderRadius: 1,
-                          color: "#666",
-                          fontSize: "0.75rem",
-                          textAlign: "center",
-                        }}
-                      >
-                        📚
-                        <br />
-                        Sin imagen
-                      </Box>
-                    )}
+                    <Avatar
+                      variant="rounded"
+                      src={
+                        libro.imagenes && libro.imagenes.length > 0
+                          ? libro.imagenes[0].urlImagen
+                          : ""
+                      }
+                      sx={{
+                        width: 60,
+                        height: 80,
+                        bgcolor: "grey.300",
+                      }}
+                    >
+                      📚
+                    </Avatar>
                   </TableCell>
 
                   <TableCell>

@@ -7,23 +7,47 @@ import {
   LibroAutor,
   ImagenProducto,
 } from "../models/index.js";
+import { Op } from "sequelize";
 import { sequelize } from "../models/index.js";
 
 // Obtener todas las libros activas
 const getAllLibros = async (req, res) => {
   try {
-    // parámetros de ordenamiento
+    // parámetros de ordenamiento Y FILTROS
     const {
       id_categoria,
       page = 1,
       limit = 10,
       sortBy = "titulo",
       sortDirection = "asc",
+      search, // Búsqueda por título
+      autor, // Filtro por autor
+      precioMin, // Precio mínimo
+      precioMax, // Precio máximo
     } = req.query;
+
     let whereClause = { activa: true };
 
     if (id_categoria) {
       whereClause.id_categoria = id_categoria;
+    }
+
+    // 👇 Aplicar filtro de búsqueda por título
+    if (search) {
+      whereClause.titulo = {
+        [Op.like]: `%${search}%`,
+      };
+    }
+
+    // 👇 Aplicar filtro de precio
+    if (precioMin !== undefined || precioMax !== undefined) {
+      whereClause.precio = {};
+      if (precioMin !== undefined) {
+        whereClause.precio[Op.gte] = parseFloat(precioMin);
+      }
+      if (precioMax !== undefined) {
+        whereClause.precio[Op.lte] = parseFloat(precioMax);
+      }
     }
 
     // Convertir a números y calcular offset
@@ -34,37 +58,51 @@ const getAllLibros = async (req, res) => {
     // cláusula de ordenamiento
     const order = [[sortBy, sortDirection.toUpperCase()]];
 
+    // 👇 PREPARAR INCLUDE PARA AUTORES
+    const include = [
+      {
+        model: ImagenProducto,
+        as: "imagenes",
+        attributes: ["id", "urlImagen"],
+        limit: 1,
+        required: false,
+      },
+      {
+        model: Categoria,
+        as: "categoria",
+        attributes: ["nombre"],
+      },
+      {
+        model: Editorial,
+        as: "editorial",
+        attributes: ["nombre"],
+      },
+      {
+        model: Autor,
+        as: "autores",
+        attributes: ["id", "nombre", "apellido"],
+        through: { attributes: [] },
+      },
+    ];
+
+    // 👇 SI HAY FILTRO POR AUTOR, AGREGAR WHERE AL INCLUDE
+    if (autor) {
+      include[3].where = {
+        [Op.or]: [
+          { nombre: { [Op.like]: `%${autor}%` } },
+          { apellido: { [Op.like]: `%${autor}%` } },
+        ],
+      };
+    }
+
     // findAndCountAll para obtener datos + total count
     const { count, rows: libros } = await Libro.findAndCountAll({
       where: whereClause,
-      include: [
-        {
-          model: ImagenProducto,
-          as: "imagenes",
-          attributes: ["id", "urlImagen"],
-          limit: 1,
-          required: false,
-        },
-        {
-          model: Categoria,
-          as: "categoria",
-          attributes: ["nombre"],
-        },
-        {
-          model: Editorial,
-          as: "editorial",
-          attributes: ["nombre"],
-        },
-        {
-          model: Autor,
-          as: "autores",
-          attributes: ["id", "nombre", "apellido"],
-          through: { attributes: [] }, // para relaciones muchos a muchos, para no traer datos de la tabla intermedia
-        },
-      ],
+      include: include, // 👈 Usar el include que preparamos
       limit: limitNumber,
       offset: offset,
       order: order,
+      distinct: true, // IMPORTANTE: Para contar correctamente con includes
     });
 
     // Transformar datos para el front
@@ -206,36 +244,41 @@ const createLibro = async (req, res) => {
       include: [
         {
           model: Autor,
-          as: 'autores',
-          through: { attributes: [] }
+          as: "autores",
+          through: { attributes: [] },
         },
         {
           model: ImagenProducto,
-          as: 'imagenes'
-        }
+          as: "imagenes",
+        },
       ],
-      transaction
+      transaction,
     });
 
     await transaction.commit();
 
     // Emitir notificación DESPUÉS del commit exitoso
-    const io = req.app.get('io');
+    const io = req.app.get("io");
     if (io) {
-      io.emit('nuevo-libro', {
+      io.emit("nuevo-libro", {
         id: libroCompleto.id,
         titulo: libroCompleto.titulo,
-        autores: libroCompleto.autores || [{ nombre: 'Autor', apellido: 'Desconocido' }],
-        precio: parseFloat(libroCompleto.precio).toLocaleString('es-AR'),
-        imagen: libroCompleto.imagenes?.[0]?.urlImagen || '/placeholder-book.jpg',
-        fecha: new Date().toLocaleTimeString('es-AR')
+        autores: libroCompleto.autores || [
+          { nombre: "Autor", apellido: "Desconocido" },
+        ],
+        precio: parseFloat(libroCompleto.precio).toLocaleString("es-AR"),
+        imagen:
+          libroCompleto.imagenes?.[0]?.urlImagen || "/placeholder-book.jpg",
+        fecha: new Date().toLocaleTimeString("es-AR"),
       });
 
-      console.log('📢 Notificación enviada para nuevo libro:', libroCompleto.titulo);
+      console.log(
+        "📢 Notificación enviada para nuevo libro:",
+        libroCompleto.titulo
+      );
     }
 
     res.status(201).json(libroCompleto);
-
   } catch (error) {
     await transaction.rollback();
     console.error("❌ Error al crear libro:", error);
@@ -378,6 +421,5 @@ const deleteLibro = async (req, res) => {
     res.status(500).json({ error: "Error al eliminar la libro" });
   }
 };
-
 
 export { getAllLibros, getLibroById, createLibro, updateLibro, deleteLibro };

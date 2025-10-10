@@ -10,68 +10,43 @@ import {
 } from "@mui/material";
 import { Search, FilterAlt, Clear } from "@mui/icons-material";
 
-function FilterBar({ libros, onFilter }) {
+function FilterBar({ onSearchChange }) { // 👈 Solo recibe onSearchChange
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAutor, setSelectedAutor] = useState("");
   const [priceRange, setPriceRange] = useState("");
 
-  // Función para normalizar texto (quitar tildes y caracteres especiales)
+  // 👇 FUNCIÓN PARA NORMALIZAR TEXTO
   const normalizarTexto = (texto) => {
     if (!texto) return '';
     return texto
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Elimina tildes
-      .replace(/[^a-z0-9\s]/g, ""); // Elimina caracteres especiales (opcional)
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, "");
   };
 
-  // Extraer autores únicos para el filtro
-  const autoresUnicos = [...new Set(libros.map((p) => p.autor))];
-
-  // Función para aplicar filtros
+  // 👇 APLICAR FILTROS
   const applyFilters = () => {
-    let filtered = [...libros];
-
-    if (searchTerm) {
-      const terminoNormalizado = normalizarTexto(searchTerm);
-      
-      filtered = filtered.filter((p) => {
-        const tituloNormalizado = normalizarTexto(p.titulo);
-        return tituloNormalizado.includes(terminoNormalizado);
-      });
-    }
-
-    if (selectedAutor) {
-      filtered = filtered.filter((p) => p.autor === selectedAutor);
-    }
-
-    if (priceRange) {
-      switch (priceRange) {
-        case "menos-10k":
-          filtered = filtered.filter((p) => p.precio < 10000);
-          break;
-        case "10k-15k":
-          filtered = filtered.filter(
-            (p) => p.precio >= 10000 && p.precio <= 15000
-          );
-          break;
-        case "mas-15k":
-          filtered = filtered.filter((p) => p.precio > 15000);
-          break;
-        default:
-          break;
-      }
-    }
-
-    onFilter(filtered);
+    const filters = {
+      search: searchTerm,
+      autor: selectedAutor,
+      precio: priceRange,
+    };
+    
+    onSearchChange(filters);
   };
 
-  // Resetear filtros
+  // 👇 RESETEAR FILTROS
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedAutor("");
     setPriceRange("");
-    onFilter(libros);
+    
+    onSearchChange({
+      search: "",
+      autor: "",
+      precio: ""
+    });
   };
 
   return (
@@ -101,25 +76,24 @@ function FilterBar({ libros, onFilter }) {
             startAdornment: <Search sx={{ mr: 1, color: "action.active" }} />,
           }}
           sx={{ flexGrow: 1 }}
-          placeholder="Ej: Hamlet"
+          placeholder="Ej: 'tunel' encontrará 'El Túnel'"
         />
 
-        {/* Filtro por autor */}
+        {/* 👇 Filtro por autor - INPUT MANUAL */}
         <TextField
-          select
-          label="Autor"
+          label="Buscar por autor"
+          variant="outlined"
           size="small"
           value={selectedAutor}
           onChange={(e) => setSelectedAutor(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              applyFilters();
+            }
+          }}
           sx={{ minWidth: 150 }}
-        >
-          <MenuItem value="">Todos</MenuItem>
-          {autoresUnicos.map((autor) => (
-            <MenuItem key={autor} value={autor}>
-              {autor}
-            </MenuItem>
-          ))}
-        </TextField>
+          placeholder="Nombre del autor"
+        />
 
         {/* Filtro por precio */}
         <TextField
