@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   TextField,
   Box,
@@ -181,6 +182,12 @@ export default function AdminLibros() {
     descuento: 0,
     imageFiles: [],
     imagesToRemove: [],
+  });
+  // ESTADOS PARA CONFIRMACIÓN DE DELETE
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    libroId: null,
+    libroTitulo: "",
   });
 
   const handleRemoveExistingImage = (imageUrl) => {
@@ -377,19 +384,41 @@ export default function AdminLibros() {
     }
   };
 
-  const handleDelete = async (id) => {
-    showSnackbar(
-      "Función de confirmación aún no implementada, pero el código de eliminación ya está disponible.",
-      "info"
-    );
+  // 👇 NUEVA FUNCIÓN: Abrir diálogo de confirmación
+  const handleDeleteClick = (libro) => {
+    setDeleteDialog({
+      open: true,
+      libroId: libro.id,
+      libroTitulo: libro.titulo,
+    });
+  };
+
+  // 👇 FUNCIÓN ACTUAL MODIFICADA: Confirmar eliminación
+  const handleDeleteConfirm = async () => {
     try {
-      await libroService.deleteLibro(id);
-      showSnackbar("Libro eliminado correctamente");
+      await libroService.deleteLibro(deleteDialog.libroId);
+      showSnackbar(`"${deleteDialog.libroTitulo}" eliminado correctamente`);
       cargarLibros(paginaActual);
     } catch (error) {
       console.error("Error eliminando libro:", error);
       showSnackbar("Error al eliminar el libro", "error");
+    } finally {
+      // Cerrar el diálogo sin importar el resultado
+      setDeleteDialog({
+        open: false,
+        libroId: null,
+        libroTitulo: "",
+      });
     }
+  };
+
+  // 👇 FUNCIÓN: Cancelar eliminación
+  const handleDeleteCancel = () => {
+    setDeleteDialog({
+      open: false,
+      libroId: null,
+      libroTitulo: "",
+    });
   };
 
   return (
@@ -534,7 +563,7 @@ export default function AdminLibros() {
                       <Edit />
                     </IconButton>
                     <IconButton
-                      onClick={() => handleDelete(libro.id)}
+                      onClick={() => handleDeleteClick(libro)}
                       size="small"
                       color="error"
                     >
@@ -749,6 +778,71 @@ export default function AdminLibros() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* 👇 DIÁLOGO DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={handleDeleteCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle
+          id="alert-dialog-title"
+          sx={{ color: "error.main", fontWeight: "bold" }}
+        >
+          🗑️ Confirmar Eliminación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            ¿Estás seguro de que deseas eliminar el libro
+            <Typography
+              component="span"
+              fontWeight="bold"
+              color="primary"
+              sx={{ mx: 1 }}
+            >
+              "{deleteDialog.libroTitulo}"
+            </Typography>
+            ?
+          </DialogContentText>
+          <DialogContentText
+            sx={{ mt: 2, color: "warning.main", fontStyle: "italic" }}
+          >
+            ⚠️ Esta acción no se puede deshacer. El libro se marcará como
+            inactivo.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            onClick={handleDeleteCancel}
+            variant="outlined"
+            sx={{
+              borderColor: "grey.400",
+              "&:hover": {
+                borderColor: "grey.600",
+                backgroundColor: "grey.50",
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            autoFocus
+            sx={{
+              backgroundColor: "error.main",
+              "&:hover": {
+                backgroundColor: "error.dark",
+              },
+            }}
+          >
+            Sí, Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
