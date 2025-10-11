@@ -6,21 +6,24 @@ import {
   Button,
   Typography,
   Box,
+  Link,
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 
-export default function Login() {
+const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth(); // ✅ loginWithGoogle viene del contexto
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,7 +31,6 @@ export default function Login() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -37,101 +39,245 @@ export default function Login() {
     setError("");
 
     try {
-      const result = await login(formData.email, formData.password);
-
-      if (result.success) {
-        navigate("/"); // manda al home después del login exitoso
-      } else {
-        setError(result.error);
-      }
+      await login(formData.email, formData.password);
+      navigate("/");
     } catch (err) {
-      setError("Error inesperado al iniciar sesión", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ FUNCIÓN TEMPORAL PARA GOOGLE AUTH (reemplaza authService.googleAuth)
+  const googleAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/google");
+      const data = await response.json();
+      return data.authUrl;
+    } catch (error) {
+      throw new Error("Error al obtener URL de Google");
+    }
+  };
+
+  /* const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError('');
+
+    try {
+      // ✅ Usar la función temporal en lugar de authService
+      const authUrl = await googleAuth();
+      const popup = window.open(
+        authUrl,
+        'Google Login',
+        'width=600,height=600,left=100,top=100'
+      );
+
+      // Escuchar mensajes del popup
+      const handleMessage = async (event) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data.type === 'OAUTH_SUCCESS') {
+          const { code } = event.data;
+
+          try {
+            // ✅ Usar loginWithGoogle del contexto (que ya existe)
+            const result = await loginWithGoogle(code);
+
+            if (result.success) {
+              if (popup) popup.close();
+              window.removeEventListener('message', handleMessage);
+            } else {
+              setError(result.error);
+            }
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setGoogleLoading(false);
+          }
+        } else if (event.data.type === 'OAUTH_ERROR') {
+          setError(event.data.error);
+          setGoogleLoading(false);
+          if (popup) popup.close();
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Verificar si el popup fue bloqueado
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        setError('El popup fue bloqueado. Por favor, permite ventanas emergentes para este sitio.');
+        setGoogleLoading(false);
+        return;
+      }
+
+    } catch (err) {
+      setError(err.message);
+      setGoogleLoading(false);
+    }
+  }; */
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      console.log("🔐 1. Iniciando proceso OAuth...");
+
+      // Obtener URL de Google
+      const response = await fetch("http://localhost:3000/api/auth/google");
+      const data = await response.json();
+
+      console.log("🔐 2. URL de Google recibida");
+
+      // Crear popup con características específicas
+      const width = 600;
+      const height = 600;
+      const left = (window.screen.width - width) / 2;
+      const top = (window.screen.height - height) / 2;
+
+      const popup = window.open(
+        data.authUrl,
+        "Google Login",
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      );
+
+      if (!popup) {
+        throw new Error(
+          "No se pudo abrir la ventana emergente. Por favor, permite ventanas emergentes para este sitio."
+        );
+      }
+
+      console.log("🔐 3. Popup abierto");
+
+      // Escuchar mensajes del popup
+      const handleMessage = (event) => {
+        console.log("🔐 4. Mensaje recibido:", event.data);
+
+        // Verificar origen del mensaje
+        if (event.origin !== window.location.origin) {
+          console.log("🔐 5. Origen no permitido:", event.origin);
+          return;
+        }
+
+        if (event.data.type === "OAUTH_SUCCESS") {
+          const { code } = event.data;
+          console.log("🔐 6. Código recibido del popup");
+
+          // Procesar el código
+          processOAuthCode(code);
+        } else if (event.data.type === "OAUTH_ERROR") {
+          console.error("🔐 7. Error del popup:", event.data.error);
+          setError(event.data.error);
+          setGoogleLoading(false);
+          if (popup && !popup.closed) popup.close();
+        }
+      };
+
+      // Función para procesar el código OAuth
+      const processOAuthCode = async (code) => {
+        try {
+          console.log("🔐 8. Llamando a loginWithGoogle...");
+          const result = await loginWithGoogle(code);
+          console.log("🔐 9. Resultado de loginWithGoogle:", result);
+
+          if (result.success) {
+            console.log("🔐 10. Login exitoso");
+            if (popup && !popup.closed) popup.close();
+            window.removeEventListener("message", handleMessage);
+          } else {
+            console.error("🔐 11. Error en login:", result.error);
+            setError(result.error);
+          }
+        } catch (err) {
+          console.error("🔐 12. Error en loginWithGoogle:", err);
+          setError(err.message);
+        } finally {
+          setGoogleLoading(false);
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      // Verificar periódicamente si el popup se cerró sin enviar mensaje
+      const popupCheck = setInterval(() => {
+        if (popup.closed) {
+          console.log("🔐 13. Popup cerrado sin enviar mensaje");
+          clearInterval(popupCheck);
+          window.removeEventListener("message", handleMessage);
+
+          // Solo mostrar error si todavía está cargando
+          if (googleLoading) {
+            setGoogleLoading(false);
+            setError(
+              "La ventana de autenticación se cerró inesperadamente. Por favor, intenta nuevamente."
+            );
+          }
+        }
+      }, 500);
+
+      // Limpiar intervalo después de 2 minutos
+      setTimeout(() => {
+        clearInterval(popupCheck);
+      }, 120000);
+    } catch (err) {
+      console.error("🔐 14. Error general:", err);
+      setError(err.message);
+      setGoogleLoading(false);
+    }
+  };
+
   return (
-    <Container
-      component="main"
-      maxWidth={false}
-      disableGutters
-      sx={{
-        height: "100vh",
-        background: "linear-gradient(135deg, #006D77 0%, #00474E 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <Container component="main" maxWidth="sm">
       <Box
         sx={{
+          marginTop: 8,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
         }}
       >
-        <Paper
-          elevation={8}
-          sx={{
-            padding: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-            maxWidth: 400,
-            borderRadius: 2,
-          }}
-        >
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <Typography
-              component="h1"
-              variant="h4"
-              color="primary"
-              gutterBottom
-              fontWeight="bold"
-            >
-              Nodo Literario
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
-              Iniciar Sesión
-            </Typography>
-          </Box>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 3, textAlign: "center" }}
-          >
-            Ingresa a tu cuenta de Nodo Literario
+        <Paper elevation={3} sx={{ padding: 4, width: "100%" }}>
+          <Typography component="h1" variant="h4" align="center" gutterBottom>
+            Iniciar Sesión
           </Typography>
 
           {error && (
-            <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{ mt: 1, width: "100%" }}
-          >
+          {/* Botón de Google */}
+          <GoogleAuthButton
+            onClick={handleGoogleLogin}
+            loading={googleLoading}
+          />
+
+          <Box sx={{ display: "flex", alignItems: "center", my: 2 }}>
+            <Box
+              sx={{ flexGrow: 1, height: "1px", backgroundColor: "grey.300" }}
+            />
+            <Typography variant="body2" sx={{ mx: 2, color: "grey.600" }}>
+              o
+            </Typography>
+            <Box
+              sx={{ flexGrow: 1, height: "1px", backgroundColor: "grey.300" }}
+            />
+          </Box>
+
+          {/* Formulario de login normal */}
+          <form onSubmit={handleSubmit}>
             <TextField
               margin="normal"
               required
               fullWidth
               id="email"
-              label="Correo Electrónico"
+              label="Email"
               name="email"
               autoComplete="email"
               autoFocus
               value={formData.email}
               onChange={handleChange}
-              disabled={loading}
-              sx={{ mb: 2 }}
             />
             <TextField
               margin="normal"
@@ -144,46 +290,27 @@ export default function Login() {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
-              disabled={loading}
-              sx={{ mb: 3 }}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              size="large"
-              sx={{
-                mt: 2,
-                mb: 2,
-                py: 1.5,
-                backgroundColor: "#00474E",
-                "&:hover": {
-                  backgroundColor: "#006D77",
-                },
-              }}
+              sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
               {loading ? <CircularProgress size={24} /> : "Iniciar Sesión"}
             </Button>
-          </Box>
+          </form>
 
-          {/* Enlace al registro - Manteniendo la funcionalidad original */}
-          <Box sx={{ mt: 2, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
-              ¿No tienes una cuenta?{" "}
-              <Button
-                component="a"
-                href="/registro"
-                variant="text"
-                size="small"
-                sx={{ color: "primary.main" }}
-              >
-                Regístrate aquí
-              </Button>
-            </Typography>
+          <Box sx={{ textAlign: "center" }}>
+            <Link component={RouterLink} to="/registro" variant="body2">
+              ¿No tienes cuenta? Regístrate
+            </Link>
           </Box>
         </Paper>
       </Box>
     </Container>
   );
-}
+};
+
+export default Login;

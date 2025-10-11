@@ -5,8 +5,8 @@ import { Usuario, Cliente, Administrador } from "../models/index.js";
 class AuthService {
   constructor() {
     this.jwtSecret = process.env.JWT_SECRET;
-    this.accessTokenExpiresIn = "40m"; // Token corto para acceso
-    this.refreshTokenExpiresIn = "7d"; // Token largo para renovación
+    this.accessTokenExpiresIn = "40m";
+    this.refreshTokenExpiresIn = "7d";
   }
 
   // Generar tokens
@@ -131,44 +131,44 @@ class AuthService {
     }
 
     // Verificar si es login de admin
-  if (isAdminLogin && !usuario.administrador) {
-    throw new Error('No tienes permisos de administrador');
-  }
+    if (isAdminLogin && !usuario.administrador) {
+      throw new Error("No tienes permisos de administrador");
+    }
 
-  // Determinar tipo de usuario
-  let userType = 'cliente';
-  let clienteId = usuario.cliente?.id;
-  let adminId = usuario.administrador?.id;
-  let rol = usuario.administrador?.rol;
+    // Determinar tipo de usuario
+    let userType = "cliente";
+    let clienteId = usuario.cliente?.id;
+    let adminId = usuario.administrador?.id;
+    let rol = usuario.administrador?.rol;
 
-  if (usuario.administrador) {
-    userType = 'administrador';
-  }
+    if (usuario.administrador) {
+      userType = "administrador";
+    }
 
-  // Generar tokens
-  const payload = {
-    userId: usuario.id,
-    clienteId,
-    adminId,
-    email: usuario.email,
-    tipo: userType,
-    rol: rol
-  };
-
-  const tokens = this.generateTokens(payload);
-
-  return {
-    usuario: {
-      id: usuario.id,
+    // Generar tokens
+    const payload = {
+      userId: usuario.id,
+      clienteId,
+      adminId,
       email: usuario.email,
-      nombre: usuario.nombre,
-      apellido: usuario.apellido
-    },
-    esAdministrador: !!usuario.administrador,
-    rol: rol,
-    tokens
-  };
-}
+      tipo: userType,
+      rol: rol,
+    };
+
+    const tokens = this.generateTokens(payload);
+
+    return {
+      usuario: {
+        id: usuario.id,
+        email: usuario.email,
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+      },
+      esAdministrador: !!usuario.administrador,
+      rol: rol,
+      tokens,
+    };
+  }
 
   // Refresh token
   async refreshToken(refreshToken) {
@@ -226,6 +226,40 @@ class AuthService {
 
     return { message: "Contraseña actualizada exitosamente" };
   }
+
+  // NUEVO MÉTODO: Obtener perfil de usuario
+  async getProfile(accessToken) {
+    try {
+      // Verificar el token
+      const decoded = jwt.verify(accessToken, this.jwtSecret);
+      
+      // Buscar usuario con sus relaciones
+      const usuario = await Usuario.findByPk(decoded.userId, {
+        attributes: { exclude: ['password_hash'] },
+        include: [
+          {
+            model: Cliente,
+            as: "cliente",
+            required: false,
+          },
+          {
+            model: Administrador,
+            as: "administrador", 
+            required: false,
+          }
+        ]
+      });
+
+      if (!usuario) {
+        throw new Error("Usuario no encontrado");
+      }
+
+      return { usuario };
+    } catch (error) {
+      throw new Error("Token inválido o usuario no encontrado");
+    }
+  }
 }
 
+// SOLO EXPORTAR LA INSTANCIA - ELIMINAR LOS EXPORTS NOMBRADOS
 export default new AuthService();

@@ -8,7 +8,6 @@ const Usuario = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
-      //field: "id_usuario", // Mapeo a la BD
     },
     email: {
       type: DataTypes.STRING(255),
@@ -18,12 +17,13 @@ const Usuario = sequelize.define(
         isEmail: true,
       },
     },
-    password_hash: {
+    passwordHash: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
+      field: "password_hash" // Mapeo explícito
     },
     nombre: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     apellido: {
@@ -34,15 +34,36 @@ const Usuario = sequelize.define(
       type: DataTypes.STRING(20),
       allowNull: true,
     },
-    fecha_registro: {
+    fechaRegistro: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
       allowNull: false,
+      field: "fecha_registro"
     },
     activo: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
       allowNull: false,
+    },
+    googleId: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: true,
+      field: "google_id"
+    },
+    authProvider: {
+      type: DataTypes.ENUM("local", "google"),
+      defaultValue: "local",
+      field: "auth_provider"
+    },
+    isEmailVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: "is_email_verified"
+    },
+    avatar: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {

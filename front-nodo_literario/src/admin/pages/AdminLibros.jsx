@@ -808,8 +808,7 @@ export default function AdminLibros() {
           <DialogContentText
             sx={{ mt: 2, color: "warning.main", fontStyle: "italic" }}
           >
-            ⚠️ Esta acción no se puede deshacer. El libro se marcará como
-            inactivo.
+            ⚠️ El libro se marcará como inactivo.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>

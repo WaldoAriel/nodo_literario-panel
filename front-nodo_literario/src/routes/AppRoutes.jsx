@@ -22,7 +22,9 @@ import AdminCategorias from "../admin/pages/AdminCategorias";
 import AdminLogin from "../admin/components/AdminLogin";
 // Importar ProtectedRoute
 import ProtectedRoute from "../components/ProtectedRoute";
-// 👇 IMPORTAR EL COMPONENTE DE NOTIFICACIONES
+import GoogleCallback from "../pages/Auth/GoogleCallback";
+
+// IMPORTAR EL COMPONENTE DE NOTIFICACIONES
 import NotificacionesSocket from "../components/NotificacionesSocket";
 
 function AppRoutes() {
@@ -32,10 +34,10 @@ function AppRoutes() {
   return (
     <>
       {!esRutaAdmin && <NavBar />}
-      
-      {/* 👇 AGREGAR NOTIFICACIONES - Aparecerá en TODAS las rutas */}
+
+      {/* AGREGAR NOTIFICACIONES - Aparecerá en TODAS las rutas */}
       <NotificacionesSocket />
-      
+
       <Routes>
         {/* Rutas Públicas */}
         <Route path="/" element={<Home />} />
@@ -48,6 +50,7 @@ function AppRoutes() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
         {/* Ruta de login para administradores (pública) */}
         <Route path="/admin/login" element={<AdminLogin />} />

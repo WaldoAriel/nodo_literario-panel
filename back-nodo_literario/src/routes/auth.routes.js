@@ -1,10 +1,13 @@
+// auth.routes.js - MODIFICADO
 import { Router } from "express";
 import {
   register,
   login,
   refreshToken,
   changePassword,
-  getProfile
+  getProfile,
+  googleAuth,
+  googleCallback
 } from "../controllers/authControllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -14,6 +17,10 @@ const router = Router();
 router.post("/register", register);
 router.post("/login", login);
 router.post("/refresh-token", refreshToken);
+
+// NUEVAS RUTAS OAUTH
+router.get("/google", googleAuth);
+router.post("/google/callback", googleCallback);
 
 // Rutas protegidas (requieren autenticación)
 router.get("/profile", authenticateToken, getProfile);

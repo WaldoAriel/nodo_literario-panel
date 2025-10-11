@@ -1,6 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import authService from "../services/authService";
+import {
+  login as loginService,
+  register as registerService,
+  getProfile,
+  changePassword as changePasswordService,
+  refreshToken as refreshTokenService,
+  googleCallback as googleCallbackService,
+} from "../services/authService";
 
 // Crear el contexto
 const AuthContext = createContext();
@@ -31,11 +38,11 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const savedTokens = getStoredTokens();
-      if (savedTokens) {
+      if (savedTokens && savedTokens.accessToken) {
         setTokens(savedTokens);
 
-        // Verificar si el token es válido obteniendo el perfil
-        const profile = await authService.getProfile(savedTokens.accessToken);
+        // Obtener perfil usando el servicio del FRONTEND
+        const profile = await getProfile();
 
         // DECODIFICAR EL TOKEN PARA OBTENER EL TIPO DE USUARIO
         const tokenData = JSON.parse(
@@ -50,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error verificando autenticación:", error);
-      logout(); // Si hay error, hacer logout
+      logout();
     } finally {
       setLoading(false);
     }
@@ -78,13 +85,38 @@ export const AuthProvider = ({ children }) => {
     setTokens(null);
   };
 
-  // Registro de usuario
+  // Función: Manejar login exitoso (para OAuth y normal)
+  const handleSuccessfulLogin = (response, isOAuth = false) => {
+    storeTokens(response.tokens);
+
+    // Para OAuth, la respuesta viene con user directamente
+    if (isOAuth) {
+      setUser({
+        ...response.user,
+        tipo: "cliente", // OAuth solo para clientes
+        rol: null,
+      });
+    } else {
+      // Para login normal
+      setUser({
+        ...response.usuario,
+        tipo: response.esAdministrador ? "administrador" : "cliente",
+        rol: response.rol,
+      });
+    }
+
+    // Redirigir a la página que intentaban acceder o al home
+    const from = location.state?.from?.pathname || "/";
+    navigate(from, { replace: true });
+
+    return { success: true, data: response };
+  };
+
+  // Registro de usuario - CORREGIDO
   const register = async (userData) => {
     try {
-      const response = await authService.register(userData);
-      storeTokens(response.tokens);
-      setUser(response.usuario);
-      return { success: true, data: response };
+      const response = await registerService(userData); // ✅ usar registerService
+      return handleSuccessfulLogin(response);
     } catch (error) {
       return {
         success: false,
@@ -96,25 +128,24 @@ export const AuthProvider = ({ children }) => {
   // Login de usuario
   const login = async (email, password) => {
     try {
-      const response = await authService.login(email, password);
-      storeTokens(response.tokens);
-
-      // GUARDAR USUARIO COMPLETO CON TIPO Y ROL
-      setUser({
-        ...response.usuario,
-        tipo: response.esAdministrador ? "administrador" : "cliente",
-        rol: response.rol,
-      });
-
-      // Redirigir a la página que intentaban acceder o al home
-      const from = location.state?.from?.pathname || "/";
-      navigate(from, { replace: true });
-
-      return { success: true, data: response };
+      const response = await loginService(email, password); // ✅ usar loginService
+      return handleSuccessfulLogin(response);
     } catch (error) {
       return {
         success: false,
         error: error.response?.data?.error || "Error en el login",
+      };
+    }
+  };
+  // Login con Google OAuth
+  const loginWithGoogle = async (code) => {
+    try {
+      const response = await googleCallbackService(code);
+      return handleSuccessfulLogin(response, true);
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || "Error en autenticación con Google",
       };
     }
   };
@@ -123,6 +154,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     clearTokens();
     setUser(null);
+    navigate("/");
   };
 
   // Refresh token automático
@@ -132,7 +164,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error("No hay refresh token disponible");
       }
 
-      const response = await authService.refreshToken(tokens.refreshToken);
+      const response = await refreshTokenService(tokens.refreshToken);
       storeTokens(response.tokens);
       return response.tokens.accessToken;
     } catch (error) {
@@ -164,13 +196,7 @@ export const AuthProvider = ({ children }) => {
   // Cambiar contraseña
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        throw new Error("No autenticado");
-      }
-
-      const response = await authService.changePassword(
-        token,
+      const response = await changePasswordService(
         currentPassword,
         newPassword
       );
@@ -178,7 +204,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || "Error cambiando contraseña",
+        error: error.message || "Error cambiando contraseña",
       };
     }
   };
@@ -191,6 +217,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     register,
     login,
+    loginWithGoogle,
     logout,
     getAccessToken,
     changePassword,
