@@ -42,79 +42,12 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate("/");
     } catch (err) {
-      setError(err.message);
+      console.error("Error en login:", err.message);
+
     } finally {
       setLoading(false);
     }
   };
-
-  // ✅ FUNCIÓN TEMPORAL PARA GOOGLE AUTH (reemplaza authService.googleAuth)
-  const googleAuth = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/auth/google");
-      const data = await response.json();
-      return data.authUrl;
-    } catch (error) {
-      throw new Error("Error al obtener URL de Google");
-    }
-  };
-
-  /* const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    setError('');
-
-    try {
-      // ✅ Usar la función temporal en lugar de authService
-      const authUrl = await googleAuth();
-      const popup = window.open(
-        authUrl,
-        'Google Login',
-        'width=600,height=600,left=100,top=100'
-      );
-
-      // Escuchar mensajes del popup
-      const handleMessage = async (event) => {
-        if (event.origin !== window.location.origin) return;
-
-        if (event.data.type === 'OAUTH_SUCCESS') {
-          const { code } = event.data;
-
-          try {
-            // ✅ Usar loginWithGoogle del contexto (que ya existe)
-            const result = await loginWithGoogle(code);
-
-            if (result.success) {
-              if (popup) popup.close();
-              window.removeEventListener('message', handleMessage);
-            } else {
-              setError(result.error);
-            }
-          } catch (err) {
-            setError(err.message);
-          } finally {
-            setGoogleLoading(false);
-          }
-        } else if (event.data.type === 'OAUTH_ERROR') {
-          setError(event.data.error);
-          setGoogleLoading(false);
-          if (popup) popup.close();
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Verificar si el popup fue bloqueado
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        setError('El popup fue bloqueado. Por favor, permite ventanas emergentes para este sitio.');
-        setGoogleLoading(false);
-        return;
-      }
-
-    } catch (err) {
-      setError(err.message);
-      setGoogleLoading(false);
-    }
-  }; */
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -190,7 +123,8 @@ const Login = () => {
           }
         } catch (err) {
           console.error("🔐 12. Error en loginWithGoogle:", err);
-          setError(err.message);
+          console.error("Error en login:", err.message);
+
         } finally {
           setGoogleLoading(false);
         }
@@ -221,7 +155,8 @@ const Login = () => {
       }, 120000);
     } catch (err) {
       console.error("🔐 14. Error general:", err);
-      setError(err.message);
+      console.error("Error en login:", err.message);
+
       setGoogleLoading(false);
     }
   };
