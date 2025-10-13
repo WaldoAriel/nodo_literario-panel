@@ -27,6 +27,8 @@ import GoogleCallback from "../pages/Auth/GoogleCallback";
 // IMPORTAR EL COMPONENTE DE NOTIFICACIONES
 import NotificacionesSocket from "../components/NotificacionesSocket";
 
+import Chatbot from "../components/chatbot";
+
 function AppRoutes() {
   const location = useLocation();
   const esRutaAdmin = location.pathname.startsWith("/admin");
@@ -37,6 +39,8 @@ function AppRoutes() {
 
       {/* AGREGAR NOTIFICACIONES - Aparecerá en TODAS las rutas */}
       <NotificacionesSocket />
+
+      <Chatbot />
 
       <Routes>
         {/* Rutas Públicas */}
