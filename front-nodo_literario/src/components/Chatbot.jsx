@@ -1,5 +1,6 @@
 // front-nodo_literario/src/components/Chatbot.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom'; // ← Importar useLocation
 import {
   Box,
   Fab,
@@ -22,12 +23,20 @@ import {
 import { chatbotService } from '../services/chatbotService';
 
 const Chatbot = () => {
+  const location = useLocation(); // ← Obtener la ubicación actual
   const [open, setOpen] = useState(false);
   const [mensajeInput, setMensajeInput] = useState('');
   const [mensajes, setMensajes] = useState([]);
   const [cargando, setCargando] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // No mostrar el chatbot en rutas de administración
+  const esRutaAdmin = location.pathname.startsWith("/admin");
+  if (esRutaAdmin) {
+    return null;
+  }
+
+  // ... el resto de tu código existente del Chatbot
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
