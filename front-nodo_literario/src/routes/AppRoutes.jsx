@@ -40,8 +40,6 @@ function AppRoutes() {
       {/* AGREGAR NOTIFICACIONES - Aparecerá en TODAS las rutas */}
       <NotificacionesSocket />
 
-      <Chatbot />
-
       <Routes>
         {/* Rutas Públicas */}
         <Route path="/" element={<Home />} />
@@ -117,6 +115,9 @@ function AppRoutes() {
           }
         />
       </Routes>
+
+      <Chatbot />
+
       {!esRutaAdmin && <Footer />}
     </>
   );

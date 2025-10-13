@@ -1,9 +1,28 @@
 // front-nodo_literario/src/components/Chatbot.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import {
+  Box,
+  Fab,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  IconButton,
+  Typography,
+  Paper,
+  Avatar,
+  CircularProgress
+} from '@mui/material';
+import {
+  Close as CloseIcon,
+  Send as SendIcon,
+  Chat as ChatIcon,
+  SmartToy as BotIcon
+} from '@mui/icons-material';
 import { chatbotService } from '../services/chatbotService';
 
 const Chatbot = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [mensajeInput, setMensajeInput] = useState('');
   const [mensajes, setMensajes] = useState([]);
   const [cargando, setCargando] = useState(false);
@@ -19,7 +38,7 @@ const Chatbot = () => {
 
   // Mensaje de bienvenida inicial
   useEffect(() => {
-    if (isOpen && mensajes.length === 0) {
+    if (open && mensajes.length === 0) {
       setMensajes([{
         id: 1,
         contenido: "¡Hola! Soy tu asistente de Nodo Literario. ¿En qué puedo ayudarte hoy? Puedo responder tus preguntas sobre libros, categorías y nuestros servicios.",
@@ -27,7 +46,7 @@ const Chatbot = () => {
         timestamp: new Date()
       }]);
     }
-  }, [isOpen, mensajes.length]);
+  }, [open, mensajes.length]);
 
   const enviarMensaje = async (e) => {
     e.preventDefault();
@@ -74,101 +93,229 @@ const Chatbot = () => {
     }
   };
 
-  const toggleChatbot = () => {
-    setIsOpen(!isOpen);
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <>
       {/* Botón flotante */}
-      {!isOpen && (
-        <button
-          onClick={toggleChatbot}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center"
-          style={{ width: '60px', height: '60px' }}
+      <Fab
+        color="primary"
+        aria-label="chat"
+        onClick={handleOpen}
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 9999,
+          bgcolor: 'primary.main',
+          '&:hover': {
+            bgcolor: 'primary.dark',
+          }
+        }}
+      >
+        <ChatIcon />
+      </Fab>
+
+      {/* Diálogo del Chatbot */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '70vh',
+            maxHeight: '600px',
+            borderRadius: 2,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+          }
+        }}
+      >
+        {/* Header */}
+        <DialogTitle
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            py: 2
+          }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-        </button>
-      )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BotIcon />
+            <Box>
+              <Typography variant="h6" component="div">
+                Nodo Literario
+              </Typography>
+              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                Asistente virtual
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton
+            onClick={handleClose}
+            sx={{ color: 'white' }}
+            size="small"
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-      {/* Ventana del Chatbot */}
-      {isOpen && (
-        <div className="bg-white rounded-lg shadow-xl w-80 h-96 flex flex-col">
-          {/* Header */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg flex justify-between items-center">
-            <div>
-              <h3 className="font-semibold">Nodo Literario</h3>
-              <p className="text-xs opacity-80">Asistente virtual</p>
-            </div>
-            <button
-              onClick={toggleChatbot}
-              className="text-white hover:text-gray-200 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Área de mensajes */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {/* Área de mensajes */}
+        <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <Box
+            sx={{
+              flex: 1,
+              overflow: 'auto',
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
             {mensajes.map((mensaje) => (
-              <div
+              <Box
                 key={mensaje.id}
-                className={`flex ${mensaje.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}
+                sx={{
+                  display: 'flex',
+                  justifyContent: mensaje.tipo === 'usuario' ? 'flex-end' : 'flex-start',
+                  alignItems: 'flex-start',
+                  gap: 1
+                }}
               >
-                <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
-                    mensaje.tipo === 'usuario'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-800'
-                  }`}
+                {mensaje.tipo === 'bot' && (
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: 'primary.light'
+                    }}
+                  >
+                    <BotIcon sx={{ fontSize: 18 }} />
+                  </Avatar>
+                )}
+                <Paper
+                  elevation={1}
+                  sx={{
+                    p: 2,
+                    maxWidth: '70%',
+                    bgcolor: mensaje.tipo === 'usuario' ? 'primary.main' : 'grey.100',
+                    color: mensaje.tipo === 'usuario' ? 'white' : 'text.primary',
+                    borderRadius: 2,
+                    borderTopLeftRadius: mensaje.tipo === 'bot' ? 4 : 16,
+                    borderTopRightRadius: mensaje.tipo === 'usuario' ? 4 : 16
+                  }}
                 >
-                  {mensaje.contenido}
-                </div>
-              </div>
+                  <Typography variant="body2">
+                    {mensaje.contenido}
+                  </Typography>
+                </Paper>
+                {mensaje.tipo === 'usuario' && (
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: 'secondary.main'
+                    }}
+                  >
+                    <ChatIcon sx={{ fontSize: 18 }} />
+                  </Avatar>
+                )}
+              </Box>
             ))}
+            
             {cargando && (
-              <div className="flex justify-start">
-                <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                  </div>
-                </div>
-              </div>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'primary.light'
+                  }}
+                >
+                  <BotIcon sx={{ fontSize: 18 }} />
+                </Avatar>
+                <Paper
+                  elevation={1}
+                  sx={{
+                    p: 2,
+                    bgcolor: 'grey.100',
+                    borderRadius: 2,
+                    borderTopLeftRadius: 4
+                  }}
+                >
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <CircularProgress size={16} />
+                    <Typography variant="body2" sx={{ ml: 1 }}>
+                      Escribiendo...
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
             )}
             <div ref={messagesEndRef} />
-          </div>
+          </Box>
 
           {/* Input */}
-          <form onSubmit={enviarMensaje} className="p-4 border-t">
-            <div className="flex space-x-2">
-              <input
-                type="text"
+          <Box
+            component="form"
+            onSubmit={enviarMensaje}
+            sx={{
+              p: 2,
+              borderTop: 1,
+              borderColor: 'divider',
+              bgcolor: 'background.paper'
+            }}
+          >
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                fullWidth
+                size="small"
                 value={mensajeInput}
                 onChange={(e) => setMensajeInput(e.target.value)}
                 placeholder="Escribe tu mensaje..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={cargando}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2
+                  }
+                }}
               />
-              <button
+              <IconButton
                 type="submit"
                 disabled={cargando || !mensajeInput.trim()}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark'
+                  },
+                  '&:disabled': {
+                    bgcolor: 'grey.400'
+                  }
+                }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </div>
+                <SendIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
