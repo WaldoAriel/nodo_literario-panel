@@ -20,22 +20,20 @@ function Home() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-  const fetchLibros = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/libros");
-      
-      setLibrosDestacados((response.data.libros || response.data).slice(1, 5));
-      
-    } catch (error) {
-      console.error("Error al obtener los libros destacados", error);
-      setError("No se pudieron cargar los libros destacados");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchLibros = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/libros");
+        setLibrosDestacados((response.data.libros || response.data).slice(1, 5));
+      } catch (error) {
+        console.error("Error fetching libros:", error)
+        setError("No se pudieron cargar los libros destacados");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchLibros();
-}, []);
+    fetchLibros();
+  }, []);
 
   const settings = {
     dots: true,
@@ -55,7 +53,6 @@ function Home() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "80vh",
-          backgroundColor: "#aaa",
         }}
       >
         <CircularProgress />
@@ -74,10 +71,9 @@ function Home() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "80vh",
-          backgroundColor: "#aaa",
         }}
       >
-        <Typography variant="h6" sx={{ ml: 2 }}>
+        <Typography variant="h6">
           {error}
         </Typography>
       </Box>
@@ -86,10 +82,9 @@ function Home() {
 
   return (
     <Box sx={{ width: "100%", margin: "0 auto" }}>
-      {/* HERO */}
       <Box
         sx={{
-          backgroundColor: (theme) => theme.palette.primary.dark, // color del tema
+          backgroundColor: (theme) => theme.palette.primary.dark,
           color: "white",
           py: 10,
           textAlign: "center",
@@ -124,7 +119,7 @@ function Home() {
               letterSpacing: "0.5px",
             }}
           >
-            ¡Oferta Otoñal Exclusiva!
+            ¡Oferta Primaveral Exclusiva!
           </Typography>
           <Typography
             variant="h5"
@@ -156,7 +151,6 @@ function Home() {
               }}
             >
               $37.000
-              <br />
             </Box>
             <Box
               component="span"
@@ -193,7 +187,6 @@ function Home() {
         </Container>
       </Box>
 
-      {/* Carrusel */}
       <Box sx={{ mb: 4 }}>
         <Slider {...settings}>
           {[1, 2, 3].map((num) => (
@@ -208,7 +201,6 @@ function Home() {
         </Slider>
       </Box>
 
-      {/* Libros destacados */}
       <Typography
         variant="h4"
         component="h2"
@@ -219,22 +211,15 @@ function Home() {
         Libros Destacados
       </Typography>
 
-      <Grid
-        sx={{ display: "flex", justifyContent: "space-around" }}
-        container
-        spacing={3}
-      >
+      <Grid container spacing={3} justifyContent="space-around">
         {librosDestacados.map((libro) => (
-          <Grid key={libro.id} sx={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid item key={libro.id} xs={12} sm={6} md={3}>
             <LibroCard {...libro} />
           </Grid>
         ))}
       </Grid>
 
-      {/* Botón a libros */}
-      <Box
-        sx={{ display: "flex", justifyContent: "center", mt: 4, my: 6, gap: 2 }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4, my: 6 }}>
         <Button
           sx={{
             minWidth: { xs: "100%", sm: "300px" },

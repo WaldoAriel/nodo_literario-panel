@@ -19,28 +19,38 @@ import Categorias from "./Categorias";
 function Catalogo() {
   const { id_categoria } = useParams();
   
-  // 👇 PRIMERO TODOS LOS USEState
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredLibros, setFilteredLibros] = useState([]);
   
-  // 👇 ESTADOS PARA PAGINACIÓN
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
     itemsPerPage: 16
   });
+  
   const [sortBy, setSortBy] = useState("titulo");
   const [sortDirection, setSortDirection] = useState("asc");
-
-  // ESTADO PARA FILTROS
   const [filters, setFilters] = useState({
     search: "",
     autor: "", 
     precio: ""
   });
+
+  const convertPriceFilter = (priceRange) => {
+    switch (priceRange) {
+      case "menos-10k":
+        return { max: 10000 };
+      case "10k-15k":
+        return { min: 10000, max: 15000 };
+      case "mas-15k":
+        return { min: 15000 };
+      default:
+        return {};
+    }
+  };
 
   useEffect(() => {
     const fetchLibros = async () => {
@@ -54,7 +64,6 @@ function Catalogo() {
           url += `&id_categoria=${id_categoria}`;
         }
         
-        // AGREGAR FILTROS SI EXISTEN
         if (filters.search) {
           url += `&search=${encodeURIComponent(filters.search)}`;
         }
@@ -85,8 +94,7 @@ function Catalogo() {
           }));
         }
         
-      } catch (error) {
-        console.error("Error al obtener los libros", error);
+      } catch {
         setError("No se pudieron cargar los libros. Por favor intentelo nuevamente más tarde");
       } finally {
         setLoading(false);
@@ -96,7 +104,6 @@ function Catalogo() {
     fetchLibros();
   }, [id_categoria, pagination.currentPage, pagination.itemsPerPage, sortBy, sortDirection, filters]);
 
-  // 👇 LUEGO LAS FUNCIONES
   const handlePageChange = (event, value) => {
     setPagination(prev => ({
       ...prev,
@@ -122,24 +129,9 @@ function Catalogo() {
     }));
   };
 
-  // FUNCIÓN PARA MANEJAR FILTROS
   const handleSearchChange = (newFilters) => {
     setFilters(newFilters);
     setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
-
-  // FUNCIÓN PARA CONVERTIR FILTROS DE PRECIO
-  const convertPriceFilter = (priceRange) => {
-    switch (priceRange) {
-      case "menos-10k":
-        return { max: 10000 };
-      case "10k-15k":
-        return { min: 10000, max: 15000 };
-      case "mas-15k":
-        return { min: 15000 };
-      default:
-        return {};
-    }
   };
 
   if (loading) {
@@ -150,7 +142,6 @@ function Catalogo() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          backgroundColor: "#aaa",
         }}
       >
         <CircularProgress />
@@ -169,12 +160,10 @@ function Catalogo() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          backgroundColor: "#aaa",
           color: "red",
         }}
       >
-        <CircularProgress />
-        <Typography variant="h6" sx={{ ml: 2 }}>
+        <Typography variant="h6">
           {error}
         </Typography>
       </Box>
@@ -183,35 +172,28 @@ function Catalogo() {
 
   return (
     <Box sx={{ backgroundColor: "#efefef", minHeight: "100vh" }}>
-      {/* Barra de filtros */}
       <FilterBar onSearchChange={handleSearchChange} />
       <Categorias />
 
-      {/* 👇 CONTROLES DE PAGINACIÓN Y ORDENAMIENTO */}
       <Box
         sx={{
           p: 3,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "space-around",
           alignItems: "center",
           flexWrap: "wrap",
           gap: 2,
         }}
       >
-        {/* Información de paginación */}
         <Typography variant="body2" color="text.secondary">
-          Mostrando {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}{" "}
-          -
+          Mostrando {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} -
           {Math.min(
             pagination.currentPage * pagination.itemsPerPage,
             pagination.totalItems
-          )}
-          de {pagination.totalItems} libros
+          )} de {pagination.totalItems} libros
         </Typography>
 
-        {/* Controles de ordenamiento y items por página */}
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-          {/* Ordenamiento */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Ordenar por</InputLabel>
             <Select
@@ -223,12 +205,9 @@ function Catalogo() {
               <MenuItem value="titulo-desc">Título Z-A</MenuItem>
               <MenuItem value="precio-asc">Precio: Menor a Mayor</MenuItem>
               <MenuItem value="precio-desc">Precio: Mayor a Menor</MenuItem>
-              {/* <MenuItem value="createdAt-desc">Más recientes</MenuItem>
-              <MenuItem value="createdAt-asc">Más antiguos</MenuItem> */}
             </Select>
           </FormControl>
 
-          {/* Items por página */}
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Mostrar</InputLabel>
             <Select
@@ -244,31 +223,30 @@ function Catalogo() {
         </Box>
       </Box>
 
-      {/* Grid de libros */}
-      <Grid
-        container
-        columns={12}
+      {/* Grid corregido para MUI v7 */}
+      <Box
         sx={{
           p: 4,
-          gap: 3,
+          display: "grid",
           gridTemplateColumns: {
             xs: "repeat(1, 1fr)",
             sm: "repeat(2, 1fr)",
             md: "repeat(3, 1fr)",
             lg: "repeat(4, 1fr)",
           },
+          gap: 3,
           justifyContent: { xs: "center", sm: "flex-start" },
         }}
       >
-        {filteredLibros.length === 0 && !loading && !error ? (
-          <Grid sx={{ width: "100%", textAlign: "center" }}>
+        {filteredLibros.length === 0 ? (
+          <Box sx={{ gridColumn: "1 / -1", textAlign: "center" }}>
             <Typography variant="h6" color="textSecondary" sx={{ mt: 4 }}>
               No se encontraron libros en esta categoría
             </Typography>
-          </Grid>
+          </Box>
         ) : (
           filteredLibros.map((libro) => (
-            <Grid
+            <Box
               key={libro.id}
               sx={{
                 display: "flex",
@@ -285,12 +263,11 @@ function Catalogo() {
                 oferta={libro.oferta}
                 descuento={libro.descuento}
               />
-            </Grid>
+            </Box>
           ))
         )}
-      </Grid>
+      </Box>
 
-      {/* PAGINACIÓN */}
       {pagination.totalPages > 1 && (
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <Pagination

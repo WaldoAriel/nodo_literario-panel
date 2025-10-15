@@ -1,10 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY,
 });
 
-// Configuración básica del chatbot para la librería
 const CONTEXTO_LIBRERIA = `
 Eres un asistente virtual especializado para la librería "Nodo Literario".
 
@@ -26,17 +25,13 @@ NO INVENTES:
 - Fechas de lanzamiento no confirmadas
 `;
 
-// Array simple para mantener la conversación
 let conversacion = [];
 
 export const chatbotService = {
   async enviarMensaje(mensaje) {
     try {
-      // Agregar mensaje del usuario
       conversacion.push(`Cliente: ${mensaje}`);
-
-      // Mantener solo los últimos 3 mensajes para el contexto
-      const contextoConversacion = conversacion.slice(-3).join('\n');
+      const contextoConversacion = conversacion.slice(-3).join("\n");
 
       const prompt = `${CONTEXTO_LIBRERIA}
 
@@ -53,20 +48,17 @@ Por favor, responde de manera útil:`;
       });
 
       const respuesta = response.text;
-
-      // Agregar respuesta a la conversación
       conversacion.push(`Asistente: ${respuesta}`);
 
       return {
         exito: true,
-        respuesta: respuesta
+        respuesta: respuesta,
       };
-
     } catch (error) {
-      console.error('Error en chatbot:', error);
       return {
         exito: false,
-        respuesta: "Lo siento, estoy teniendo dificultades técnicas. Por favor, intenta nuevamente o contacta con nuestro servicio al cliente."
+        respuesta:
+          "Lo siento, estoy teniendo dificultades técnicas. Por favor, intenta nuevamente o contacta con nuestro servicio al cliente.",
       };
     }
   },
@@ -77,5 +69,5 @@ Por favor, responde de manera útil:`;
 
   obtenerConversacion() {
     return [...conversacion];
-  }
+  },
 };
