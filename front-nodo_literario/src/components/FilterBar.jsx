@@ -10,12 +10,12 @@ import {
 } from "@mui/material";
 import { Search, FilterAlt, Clear } from "@mui/icons-material";
 
-function FilterBar({ onSearchChange }) { // 👈 Solo recibe onSearchChange
+function FilterBar({ onSearchChange }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAutor, setSelectedAutor] = useState("");
   const [priceRange, setPriceRange] = useState("");
 
-  // 👇 FUNCIÓN PARA NORMALIZAR TEXTO
+  // FUNCIÓN PARA NORMALIZAR TEXTO
   const normalizarTexto = (texto) => {
     if (!texto) return '';
     return texto
