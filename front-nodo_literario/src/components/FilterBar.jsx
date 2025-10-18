@@ -15,38 +15,20 @@ function FilterBar({ onSearchChange }) {
   const [selectedAutor, setSelectedAutor] = useState("");
   const [priceRange, setPriceRange] = useState("");
 
-  // FUNCIÓN PARA NORMALIZAR TEXTO
-  const normalizarTexto = (texto) => {
-    if (!texto) return '';
-    return texto
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s]/g, "");
-  };
-
-  // 👇 APLICAR FILTROS
   const applyFilters = () => {
     const filters = {
       search: searchTerm,
       autor: selectedAutor,
       precio: priceRange,
     };
-    
     onSearchChange(filters);
   };
 
-  // 👇 RESETEAR FILTROS
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedAutor("");
     setPriceRange("");
-    
-    onSearchChange({
-      search: "",
-      autor: "",
-      precio: ""
-    });
+    onSearchChange({ search: "", autor: "", precio: "" });
   };
 
   return (
@@ -76,7 +58,7 @@ function FilterBar({ onSearchChange }) {
             startAdornment: <Search sx={{ mr: 1, color: "action.active" }} />,
           }}
           sx={{ flexGrow: 1 }}
-          placeholder="Ej: 'tunel' encontrará 'El Túnel'"
+          placeholder="Ej: 'Rayuela'"
         />
 
         {/* 👇 Filtro por autor - INPUT MANUAL */}
@@ -165,7 +147,11 @@ function FilterBar({ onSearchChange }) {
 
       {/* Mensaje de ayuda */}
       {searchTerm && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 1, display: "block" }}
+        >
           💡 La búsqueda ignora tildes y mayúsculas
         </Typography>
       )}

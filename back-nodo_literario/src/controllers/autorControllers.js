@@ -3,7 +3,12 @@ import { Autor } from "../models/index.js";
 // traer todos los autores con paginación
 const getAllAutores = async (req, res) => {
   try {
-    const { page = 1, limit = 10, sortBy = 'apellido', sortDirection = 'asc' } = req.query;
+    const {
+      page = 1,
+      limit = 100,
+      sortBy = "apellido",
+      sortDirection = "asc",
+    } = req.query;
 
     // Convertir a números y calcular offset
     const pageNumber = parseInt(page);
@@ -17,7 +22,7 @@ const getAllAutores = async (req, res) => {
     const { count, rows: autores } = await Autor.findAndCountAll({
       limit: limitNumber,
       offset: offset,
-      order: order
+      order: order,
     });
 
     // respuesta paginada
@@ -27,10 +32,9 @@ const getAllAutores = async (req, res) => {
         currentPage: pageNumber,
         totalPages: Math.ceil(count / limitNumber),
         totalItems: count,
-        itemsPerPage: limitNumber
-      }
+        itemsPerPage: limitNumber,
+      },
     });
-
   } catch (error) {
     console.error("❌ Error al obtener autores:", error);
     res.status(500).json({ error: "Error al obtener los autores" });
@@ -41,11 +45,11 @@ const getAutorById = async (req, res) => {
   try {
     const { id } = req.params;
     const autor = await Autor.findByPk(id);
-    
+
     if (!autor) {
       return res.status(404).json({ error: "Autor no encontrado" });
     }
-    
+
     res.json(autor);
   } catch (error) {
     console.error("Error al obtener el autor", error);
@@ -57,16 +61,16 @@ const getAutorById = async (req, res) => {
 const createAutor = async (req, res) => {
   try {
     const { nombre, apellido } = req.body;
-    
+
     if (!nombre) {
       return res.status(400).json({ error: "El nombre es requerido" });
     }
 
     const nuevoAutor = await Autor.create({
       nombre,
-      apellido: apellido || null
+      apellido: apellido || null,
     });
-    
+
     res.status(201).json(nuevoAutor);
   } catch (error) {
     console.error("❌ Error al crear autor:", error);
