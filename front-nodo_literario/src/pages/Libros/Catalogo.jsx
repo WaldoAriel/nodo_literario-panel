@@ -28,7 +28,7 @@ function Catalogo() {
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
-    itemsPerPage: 16
+    itemsPerPage: 8
   });
   
   const [sortBy, setSortBy] = useState("titulo");

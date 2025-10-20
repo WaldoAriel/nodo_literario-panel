@@ -31,19 +31,17 @@ import {
   Alert,
   Chip,
   Avatar,
-  Box as MuiBox,
 } from "@mui/material";
 import {
   Edit,
   Delete,
   Add,
   CloudUpload,
-  CloudUpload as CloudUploadIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import axios from "axios";
 
-// Integración de libroService.js
+// Servicios
 const libroService = {
   getLibros: (page = 1, limit = 10) =>
     axios.get(
@@ -59,54 +57,60 @@ const libroService = {
     }),
   deleteLibro: (id) =>
     axios.delete(`http://localhost:3000/api/admin/libros/${id}`),
-  getLibroById: (id) =>
-    axios.get(`http://localhost:3000/api/admin/libros/${id}`),
 };
 
-// Integración de relacionesService.js
 const relacionesService = {
   getCategorias: () => axios.get(`http://localhost:3000/api/categorias`),
   getEditoriales: () => axios.get(`http://localhost:3000/api/editoriales`),
   getAutores: () => axios.get(`http://localhost:3000/api/autores`),
 };
 
-// Integración de ImageUploader.jsx
-const ImageUploader = ({ onImageSelect, existingImages = [] }) => {
-  const [previews, setPreviews] = useState([]);
+// Componente ImageUploader mejorado
+const ImageUploader = ({
+  onImageSelect,
+  existingImages = [],
+  onRemoveExisting,
+}) => {
+  const [newFiles, setNewFiles] = useState([]);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    if (existingImages.length > 0) {
-      setPreviews(
-        existingImages.map((img) =>
-          typeof img === "string" ? img : URL.createObjectURL(img)
-        )
-      );
-    } else {
-      setPreviews([]);
-    }
-  }, [existingImages]);
+  const allPreviews = [
+    ...existingImages.map((img, index) => ({
+      type: "existing",
+      url: img,
+      id: `existing-${index}`,
+    })),
+    ...newFiles.map((file, index) => ({
+      type: "new",
+      url: URL.createObjectURL(file),
+      id: `new-${index}`,
+      file: file,
+    })),
+  ];
 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-
-    setPreviews(newPreviews);
-    onImageSelect(files);
-  };
-
-  const handleRemoveImage = (indexToRemove) => {
-    const newPreviews = previews.filter((_, index) => index !== indexToRemove);
-    setPreviews(newPreviews);
-    onImageSelect(existingImages.filter((_, index) => index !== indexToRemove));
-
-    if (fileInputRef.current) {
+    if (files.length > 0) {
+      const updatedFiles = [...newFiles, ...files];
+      setNewFiles(updatedFiles);
+      onImageSelect(updatedFiles);
       fileInputRef.current.value = "";
     }
   };
 
+  const handleRemoveImage = (image) => {
+    if (image.type === "existing" && onRemoveExisting) {
+      onRemoveExisting(image.url);
+    } else if (image.type === "new") {
+      const updatedFiles = newFiles.filter((_, i) => `new-${i}` !== image.id);
+      setNewFiles(updatedFiles);
+      onImageSelect(updatedFiles);
+      URL.revokeObjectURL(image.url);
+    }
+  };
+
   return (
-    <MuiBox sx={{ mb: 2 }}>
+    <Box sx={{ mb: 2 }}>
       <input
         type="file"
         accept="image/*"
@@ -118,44 +122,71 @@ const ImageUploader = ({ onImageSelect, existingImages = [] }) => {
       />
 
       <label htmlFor="image-upload">
-        <Button
-          variant="outlined"
-          component="span"
-          startIcon={<CloudUploadIcon />}
-        >
-          {previews.length > 0 ? "Cambiar imágenes" : "Seleccionar imágenes"}
+        <Button variant="outlined" component="span" startIcon={<CloudUpload />}>
+          {allPreviews.length > 0
+            ? "Agregar más imágenes"
+            : "Seleccionar imágenes"}
         </Button>
       </label>
 
-      {previews.length > 0 && (
-        <MuiBox sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {previews.map((previewUrl, index) => (
-            <MuiBox key={index} sx={{ position: "relative" }}>
-              <img
-                src={previewUrl}
-                alt={`Vista previa ${index + 1}`}
-                style={{
-                  maxWidth: "100px",
-                  maxHeight: "100px",
-                  borderRadius: "8px",
-                }}
-              />
-              <IconButton
-                onClick={() => handleRemoveImage(index)}
-                sx={{
-                  position: "absolute",
-                  top: -10,
-                  right: -10,
-                  backgroundColor: "white",
-                }}
-              >
-                <DeleteIcon color="error" />
-              </IconButton>
-            </MuiBox>
-          ))}
-        </MuiBox>
+      {allPreviews.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+            {allPreviews.length} imagen(es) seleccionada(s)
+            {allPreviews[0] && <strong> • La primera es portada</strong>}
+          </Typography>
+
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            {allPreviews.map((img, index) => (
+              <Box key={img.id} sx={{ position: "relative" }}>
+                <img
+                  src={img.url}
+                  alt={`Vista previa ${index + 1}`}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    border:
+                      index === 0 ? "3px solid #1976d2" : "1px solid #ddd",
+                  }}
+                />
+                {index === 0 && (
+                  <Chip
+                    label="Portada"
+                    size="small"
+                    color="primary"
+                    sx={{
+                      position: "absolute",
+                      top: -8,
+                      left: -8,
+                      fontSize: "0.6rem",
+                      height: 20,
+                    }}
+                  />
+                )}
+                <IconButton
+                  onClick={() => handleRemoveImage(img)}
+                  sx={{
+                    position: "absolute",
+                    top: -8,
+                    right: -8,
+                    backgroundColor: "white",
+                    boxShadow: 1,
+                    "&:hover": { backgroundColor: "grey.100" },
+                    width: 24,
+                    height: 24,
+                  }}
+                  size="small"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       )}
-    </MuiBox>
+    </Box>
   );
 };
 
@@ -168,6 +199,9 @@ export default function AdminLibros() {
   const [categorias, setCategorias] = useState([]);
   const [editoriales, setEditoriales] = useState([]);
   const [autores, setAutores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
   const [formData, setFormData] = useState({
     titulo: "",
     isbn: "",
@@ -181,31 +215,23 @@ export default function AdminLibros() {
     oferta: false,
     descuento: 0,
     imageFiles: [],
+    existingImages: [],
     imagesToRemove: [],
   });
-  // ESTADOS PARA CONFIRMACIÓN DE DELETE
+
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     libroId: null,
     libroTitulo: "",
   });
 
-  const handleRemoveExistingImage = (imageUrl) => {
-    setFormData((prev) => ({
-      ...prev,
-      existingImages: prev.existingImages.filter((img) => img !== imageUrl),
-      imagesToRemove: [...prev.imagesToRemove, imageUrl],
-    }));
-  };
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
+  // Funciones auxiliares
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
@@ -214,9 +240,6 @@ export default function AdminLibros() {
     setLoading(true);
     try {
       const response = await libroService.getLibros(page, 4);
-
-      console.log("📚 Datos de libros recibidos:", response.data.libros); // DEBUG
-
       setLibros(response.data.libros);
       setTotalPaginas(response.data.pagination.totalPages);
       setPaginaActual(page);
@@ -237,20 +260,9 @@ export default function AdminLibros() {
         relacionesService.getAutores(),
       ]);
 
-      const categoriasData =
-        catResponse.data?.categorias ||
-        catResponse.data?.data ||
-        catResponse.data;
-      const editorialesData =
-        editResponse.data?.editoriales ||
-        editResponse.data?.data ||
-        editResponse.data;
-      const autoresData =
-        autResponse.data?.autores || autResponse.data?.data || autResponse.data;
-
-      setCategorias(Array.isArray(categoriasData) ? categoriasData : []);
-      setEditoriales(Array.isArray(editorialesData) ? editorialesData : []);
-      setAutores(Array.isArray(autoresData) ? autoresData : []);
+      setCategorias(catResponse.data?.categorias || []);
+      setEditoriales(editResponse.data?.editoriales || []);
+      setAutores(autResponse.data?.autores || []);
     } catch (error) {
       console.error("Error cargando datos de relaciones:", error);
     }
@@ -261,6 +273,7 @@ export default function AdminLibros() {
     cargarDatosRelaciones();
   }, []);
 
+  // Manejadores de eventos
   const handlePageChange = (event, value) => {
     cargarLibros(value);
   };
@@ -274,9 +287,14 @@ export default function AdminLibros() {
   };
 
   const handleImageSelect = (files) => {
+    setFormData((prev) => ({ ...prev, imageFiles: files }));
+  };
+
+  const handleRemoveExistingImage = (imageUrl) => {
     setFormData((prev) => ({
       ...prev,
-      imageFiles: files,
+      existingImages: prev.existingImages.filter((img) => img !== imageUrl),
+      imagesToRemove: [...prev.imagesToRemove, imageUrl],
     }));
   };
 
@@ -292,10 +310,14 @@ export default function AdminLibros() {
         id_categoria: libro.id_categoria || "",
         id_editorial: libro.id_editorial || "",
         autores: libro.autores ? libro.autores.map((a) => a.id) : [],
-        activa: libro.activa || true,
+        activa: libro.activa ?? true,
         oferta: libro.oferta || false,
         descuento: libro.descuento || 0,
         imageFiles: [],
+        existingImages: libro.imagenes
+          ? libro.imagenes.map((img) => img.urlImagen)
+          : [],
+        imagesToRemove: [],
       });
     } else {
       setCurrentLibro(null);
@@ -312,6 +334,8 @@ export default function AdminLibros() {
         oferta: false,
         descuento: 0,
         imageFiles: [],
+        existingImages: [],
+        imagesToRemove: [],
       });
     }
     setOpenModal(true);
@@ -323,68 +347,92 @@ export default function AdminLibros() {
   };
 
   const handleSave = async () => {
-    if (formData.imagesToRemove && formData.imagesToRemove.length > 0) {
-      formData.imagesToRemove.forEach((url) => {
-        libroData.append("imagesToRemove[]", url);
-      });
-    }
     if (!formData.titulo.trim()) {
       showSnackbar("El título es requerido", "error");
       return;
     }
-    if (!formData.id_categoria) {
-      showSnackbar("Debe seleccionar una categoría", "error");
-      return;
-    }
+
     if (!currentLibro && formData.imageFiles.length === 0) {
-      showSnackbar("Debe seleccionar al menos una imagen", "error");
+      showSnackbar(
+        "Debe seleccionar al menos una imagen para nuevo libro",
+        "error"
+      );
       return;
     }
 
     setSaving(true);
 
-    const libroData = new FormData();
-
-    libroData.append("titulo", formData.titulo);
-    libroData.append("isbn", formData.isbn);
-    libroData.append("descripcion", formData.descripcion);
-    libroData.append("precio", parseFloat(formData.precio));
-    libroData.append("stock", parseInt(formData.stock));
-    libroData.append("id_categoria", formData.id_categoria);
-    libroData.append("id_editorial", formData.id_editorial);
-    libroData.append("activa", formData.activa);
-    libroData.append("oferta", formData.oferta);
-    libroData.append(
-      "descuento",
-      formData.oferta ? parseFloat(formData.descuento) : 0
-    );
-    formData.autores.forEach((autorId) => {
-      libroData.append("autores[]", autorId);
-    });
-
-    formData.imageFiles.forEach((file) => {
-      libroData.append("imagenes", file);
-    });
-
     try {
-      if (currentLibro) {
+      const libroData = new FormData();
+
+      // Campos básicos
+      const campos = [
+        "titulo",
+        "isbn",
+        "descripcion",
+        "precio",
+        "stock",
+        "id_categoria",
+        "id_editorial",
+      ];
+      campos.forEach((campo) => {
+        let value = formData[campo];
+        if (campo === "precio") value = parseFloat(value);
+        if (campo === "stock") value = parseInt(value);
+        libroData.append(campo, value);
+      });
+
+      libroData.append("activa", formData.activa);
+      libroData.append("oferta", formData.oferta);
+      libroData.append(
+        "descuento",
+        formData.oferta ? parseFloat(formData.descuento) : 0
+      );
+
+      // Autores
+      formData.autores.forEach((autorId) => {
+        libroData.append("autores[]", autorId);
+      });
+
+      // Manejo diferenciado creación/edición
+      if (currentLibro?.id) {
+        // Edición
+        formData.imagesToRemove.forEach((url) => {
+          libroData.append("imagesToRemove[]", url);
+        });
+
+        formData.imageFiles.forEach((file) => {
+          libroData.append("imagenes", file);
+        });
+
         await libroService.updateLibro(currentLibro.id, libroData);
         showSnackbar("Libro actualizado correctamente");
       } else {
+        // Creación
+        formData.imageFiles.forEach((file) => {
+          libroData.append("imagenes", file);
+        });
+
         await libroService.createLibro(libroData);
         showSnackbar("Libro creado correctamente");
       }
+
       cargarLibros(paginaActual);
       handleCloseModal();
     } catch (error) {
       console.error("Error guardando libro:", error);
-      showSnackbar("Error al guardar el libro", "error");
+      if (error.response?.data?.error) {
+        showSnackbar(error.response.data.error, "error");
+      } else if (error.name === "SequelizeUniqueConstraintError") {
+        showSnackbar("El ISBN ya existe en la base de datos", "error");
+      } else {
+        showSnackbar("Error al guardar el libro", "error");
+      }
     } finally {
       setSaving(false);
     }
   };
 
-  // 👇 NUEVA FUNCIÓN: Abrir diálogo de confirmación
   const handleDeleteClick = (libro) => {
     setDeleteDialog({
       open: true,
@@ -393,7 +441,6 @@ export default function AdminLibros() {
     });
   };
 
-  // 👇 FUNCIÓN ACTUAL MODIFICADA: Confirmar eliminación
   const handleDeleteConfirm = async () => {
     try {
       await libroService.deleteLibro(deleteDialog.libroId);
@@ -403,22 +450,12 @@ export default function AdminLibros() {
       console.error("Error eliminando libro:", error);
       showSnackbar("Error al eliminar el libro", "error");
     } finally {
-      // Cerrar el diálogo sin importar el resultado
-      setDeleteDialog({
-        open: false,
-        libroId: null,
-        libroTitulo: "",
-      });
+      setDeleteDialog({ open: false, libroId: null, libroTitulo: "" });
     }
   };
 
-  // 👇 FUNCIÓN: Cancelar eliminación
   const handleDeleteCancel = () => {
-    setDeleteDialog({
-      open: false,
-      libroId: null,
-      libroTitulo: "",
-    });
+    setDeleteDialog({ open: false, libroId: null, libroTitulo: "" });
   };
 
   return (
@@ -453,23 +490,14 @@ export default function AdminLibros() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {libros && libros.length > 0 ? (
+            {libros.length > 0 ? (
               libros.map((libro) => (
                 <TableRow key={libro.id}>
-                  {/* 👇 NUEVA CELDA CON LA IMAGEN */}
                   <TableCell>
                     <Avatar
                       variant="rounded"
-                      src={
-                        libro.imagenes && libro.imagenes.length > 0
-                          ? libro.imagenes[0].urlImagen
-                          : ""
-                      }
-                      sx={{
-                        width: 60,
-                        height: 80,
-                        bgcolor: "grey.300",
-                      }}
+                      src={libro.imagenes?.[0]?.urlImagen || ""}
+                      sx={{ width: 60, height: 80, bgcolor: "grey.300" }}
                     >
                       📚
                     </Avatar>
@@ -490,7 +518,7 @@ export default function AdminLibros() {
                   </TableCell>
 
                   <TableCell>
-                    {libro.autores && libro.autores.length > 0
+                    {libro.autores?.length > 0
                       ? libro.autores
                           .map((autor) => `${autor.nombre} ${autor.apellido}`)
                           .join(", ")
@@ -498,37 +526,35 @@ export default function AdminLibros() {
                   </TableCell>
 
                   <TableCell align="right">
-                    <Box>
-                      {libro.oferta ? (
-                        <>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              textDecoration: "line-through",
-                              color: "text.secondary",
-                              fontSize: "0.8rem",
-                            }}
-                          >
-                            ${libro.precio}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            color="error.main"
-                            fontWeight="bold"
-                          >
-                            $
-                            {(
-                              libro.precio *
-                              (1 - (libro.descuento || 0) / 100)
-                            ).toFixed(2)}
-                          </Typography>
-                        </>
-                      ) : (
-                        <Typography variant="body1" fontWeight="medium">
+                    {libro.oferta ? (
+                      <>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            textDecoration: "line-through",
+                            color: "text.secondary",
+                            fontSize: "0.8rem",
+                          }}
+                        >
                           ${libro.precio}
                         </Typography>
-                      )}
-                    </Box>
+                        <Typography
+                          variant="body1"
+                          color="error.main"
+                          fontWeight="bold"
+                        >
+                          $
+                          {(
+                            libro.precio *
+                            (1 - (libro.descuento || 0) / 100)
+                          ).toFixed(2)}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="body1" fontWeight="medium">
+                        ${libro.precio}
+                      </Typography>
+                    )}
                   </TableCell>
 
                   <TableCell align="right">
@@ -592,6 +618,7 @@ export default function AdminLibros() {
         />
       </Box>
 
+      {/* Modal de libro */}
       <Dialog
         open={openModal}
         onClose={handleCloseModal}
@@ -624,11 +651,13 @@ export default function AdminLibros() {
             onChange={handleInputChange}
             sx={{ mb: 2 }}
           />
+
           <ImageUploader
             onImageSelect={handleImageSelect}
             onRemoveExisting={handleRemoveExistingImage}
-            existingImages={formData.existingImages || []}
+            existingImages={formData.existingImages}
           />
+
           <TextField
             margin="dense"
             name="descripcion"
@@ -653,7 +682,6 @@ export default function AdminLibros() {
               value={formData.precio}
               onChange={handleInputChange}
             />
-
             <TextField
               margin="dense"
               name="stock"
@@ -671,7 +699,7 @@ export default function AdminLibros() {
               <InputLabel>Categoría</InputLabel>
               <Select
                 name="id_categoria"
-                value={formData.id_categoria || ""}
+                value={formData.id_categoria}
                 onChange={handleInputChange}
                 label="Categoría"
               >
@@ -687,7 +715,7 @@ export default function AdminLibros() {
               <InputLabel>Editorial</InputLabel>
               <Select
                 name="id_editorial"
-                value={formData.id_editorial || ""}
+                value={formData.id_editorial}
                 onChange={handleInputChange}
                 label="Editorial"
               >
@@ -704,13 +732,10 @@ export default function AdminLibros() {
             <InputLabel>Autores</InputLabel>
             <Select
               multiple
-              value={formData.autores || []}
-              onChange={(e) => {
-                const value = Array.isArray(e.target.value)
-                  ? e.target.value
-                  : [e.target.value];
-                setFormData({ ...formData, autores: value });
-              }}
+              value={formData.autores}
+              onChange={(e) =>
+                setFormData({ ...formData, autores: e.target.value })
+              }
               label="Autores"
               renderValue={(selected) =>
                 selected
@@ -723,7 +748,7 @@ export default function AdminLibros() {
             >
               {autores.map((autor) => (
                 <MenuItem key={autor.id} value={autor.id}>
-                  <Checkbox checked={formData.autores?.includes(autor.id)} />
+                  <Checkbox checked={formData.autores.includes(autor.id)} />
                   <ListItemText primary={`${autor.nombre} ${autor.apellido}`} />
                 </MenuItem>
               ))}
@@ -734,8 +759,7 @@ export default function AdminLibros() {
             <FormControlLabel
               control={
                 <Checkbox
-                  name="activa"
-                  checked={formData.activa || false}
+                  checked={formData.activa}
                   onChange={(e) =>
                     setFormData({ ...formData, activa: e.target.checked })
                   }
@@ -743,12 +767,10 @@ export default function AdminLibros() {
               }
               label="Activo"
             />
-
             <FormControlLabel
               control={
                 <Checkbox
-                  name="oferta"
-                  checked={formData.oferta || false}
+                  checked={formData.oferta}
                   onChange={(e) =>
                     setFormData({ ...formData, oferta: e.target.checked })
                   }
@@ -766,7 +788,7 @@ export default function AdminLibros() {
               type="number"
               fullWidth
               variant="outlined"
-              value={formData.descuento || 0}
+              value={formData.descuento}
               onChange={handleInputChange}
             />
           )}
@@ -779,21 +801,13 @@ export default function AdminLibros() {
         </DialogActions>
       </Dialog>
 
-      {/* 👇 DIÁLOGO DE CONFIRMACIÓN DE ELIMINACIÓN */}
-      <Dialog
-        open={deleteDialog.open}
-        onClose={handleDeleteCancel}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle
-          id="alert-dialog-title"
-          sx={{ color: "error.main", fontWeight: "bold" }}
-        >
+      {/* Diálogo de confirmación de eliminación */}
+      <Dialog open={deleteDialog.open} onClose={handleDeleteCancel}>
+        <DialogTitle sx={{ color: "error.main", fontWeight: "bold" }}>
           🗑️ Confirmar Eliminación
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText>
             ¿Estás seguro de que deseas eliminar el libro
             <Typography
               component="span"
@@ -812,17 +826,7 @@ export default function AdminLibros() {
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button
-            onClick={handleDeleteCancel}
-            variant="outlined"
-            sx={{
-              borderColor: "grey.400",
-              "&:hover": {
-                borderColor: "grey.600",
-                backgroundColor: "grey.50",
-              },
-            }}
-          >
+          <Button onClick={handleDeleteCancel} variant="outlined">
             Cancelar
           </Button>
           <Button
@@ -830,12 +834,6 @@ export default function AdminLibros() {
             variant="contained"
             color="error"
             autoFocus
-            sx={{
-              backgroundColor: "error.main",
-              "&:hover": {
-                backgroundColor: "error.dark",
-              },
-            }}
           >
             Sí, Eliminar
           </Button>
@@ -845,11 +843,11 @@ export default function AdminLibros() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       >
         <Alert
           severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
         >
           {snackbar.message}
         </Alert>
