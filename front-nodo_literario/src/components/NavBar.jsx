@@ -1,20 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  Avatar, 
-  Menu, 
-  MenuItem, 
-  Divider,
-  Badge,
-  Chip
-} from "@mui/material";
-import { 
-  AutoStories, 
-  Menu as MenuIcon, 
+import { Avatar, Menu, MenuItem, Divider, Badge, Chip } from "@mui/material";
+import {
+  AutoStories,
+  Menu as MenuIcon,
   ShoppingCart,
   Person,
   ExitToApp,
-  AccountCircle
+  AccountCircle,
 } from "@mui/icons-material";
 
 import {
@@ -55,12 +48,12 @@ function NavBar() {
   const handleLogout = () => {
     logout();
     handleMenuClose();
-    navigate('/');
+    navigate("/");
   };
 
   const handleProfile = () => {
     handleMenuClose();
-    navigate('/perfil');
+    navigate("/perfil");
   };
 
   // Items del menú principal
@@ -73,16 +66,20 @@ function NavBar() {
 
   // Generar iniciales para el avatar
   const getUserInitials = () => {
-    if (!user) return 'U';
-    return `${user.nombre?.charAt(0) || ''}${user.apellido?.charAt(0) || ''}`.toUpperCase() || 'U';
+    if (!user) return "U";
+    return (
+      `${user.nombre?.charAt(0) || ""}${
+        user.apellido?.charAt(0) || ""
+      }`.toUpperCase() || "U"
+    );
   };
 
   // Drawer para móviles
   const drawer = (
     <Box sx={{ width: 280 }} onClick={handleDrawerToggle}>
       {/* Header del drawer */}
-      <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
-        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
+        <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
           <AutoStories sx={{ mr: 1 }} />
           Nodo Literario
         </Typography>
@@ -102,21 +99,21 @@ function NavBar() {
             sx={{
               color: "inherit",
               textDecoration: "none",
-              borderLeft: '3px solid transparent',
-              '&:hover': {
-                borderLeft: '3px solid',
-                borderColor: 'primary.main',
+              borderLeft: "3px solid transparent",
+              "&:hover": {
+                borderLeft: "3px solid",
+                borderColor: "primary.main",
                 backgroundColor: "rgba(0, 0, 0, 0.04)",
-              }
+              },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40, fontSize: '1.2rem' }}>
+            <ListItemIcon sx={{ minWidth: 40, fontSize: "1.2rem" }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
-        
+
         <Divider sx={{ my: 1 }} />
 
         {/* Sección de usuario */}
@@ -128,9 +125,9 @@ function NavBar() {
               sx={{
                 color: "inherit",
                 textDecoration: "none",
-                '&:hover': {
+                "&:hover": {
                   backgroundColor: "rgba(0, 0, 0, 0.04)",
-                }
+                },
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
@@ -142,9 +139,9 @@ function NavBar() {
               button
               onClick={handleLogout}
               sx={{
-                '&:hover': {
+                "&:hover": {
                   backgroundColor: "rgba(0, 0, 0, 0.04)",
-                }
+                },
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
@@ -161,9 +158,9 @@ function NavBar() {
               sx={{
                 color: "inherit",
                 textDecoration: "none",
-                '&:hover': {
+                "&:hover": {
                   backgroundColor: "rgba(0, 0, 0, 0.04)",
-                }
+                },
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
@@ -177,9 +174,9 @@ function NavBar() {
               sx={{
                 color: "inherit",
                 textDecoration: "none",
-                '&:hover': {
+                "&:hover": {
                   backgroundColor: "rgba(0, 0, 0, 0.04)",
-                }
+                },
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
@@ -195,26 +192,26 @@ function NavBar() {
 
   return (
     <>
-      <AppBar 
-        position="static" 
-        sx={{ 
+      <AppBar
+        position="static"
+        sx={{
           backgroundColor: "#00474E",
-          background: 'linear-gradient(135deg, #00474E 0%, #006B76 100%)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+          background: "linear-gradient(135deg, #00474E 0%, #006B76 100%)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Toolbar sx={{ minHeight: '70px !important' }}>
+        <Toolbar sx={{ minHeight: "70px !important" }}>
           {/* Menú Hamburguesa (Mobile) */}
           <IconButton
             color="inherit"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ 
-              mr: 2, 
+            sx={{
+              mr: 2,
               display: { sm: "none" },
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              },
             }}
           >
             <MenuIcon />
@@ -230,25 +227,25 @@ function NavBar() {
               textDecoration: "none",
               color: "inherit",
               flexGrow: { xs: 1, sm: 0 },
-              mr: { sm: 4 }
+              mr: { sm: 4 },
             }}
           >
-            <AutoStories 
-              fontSize="large" 
-              sx={{ 
+            <AutoStories
+              fontSize="large"
+              sx={{
                 mr: 2,
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-              }} 
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+              }}
             />
             <Typography
               variant="h5"
               sx={{
                 fontWeight: "bold",
-                background: 'linear-gradient(45deg, #FFFFFF, #E0F7FA)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                background: "linear-gradient(45deg, #FFFFFF, #E0F7FA)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+                textShadow: "0 2px 4px rgba(0,0,0,0.1)",
               }}
             >
               Nodo Literario
@@ -256,26 +253,30 @@ function NavBar() {
           </Box>
 
           {/* Menú de Navegación (Desktop) */}
-          <Box sx={{ 
-            display: { xs: "none", md: "flex" }, 
-            flexGrow: 1,
-            gap: 1
-          }}>
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              flexGrow: 1,
+              gap: 1,
+            }}
+          >
             {menuItems.map((item) => (
               <Button
                 key={item.text}
                 color="inherit"
                 component={Link}
                 to={item.path}
-                startIcon={<span style={{ fontSize: '1.1rem' }}>{item.icon}</span>}
+                startIcon={
+                  <span style={{ fontSize: "1.1rem" }}>{item.icon}</span>
+                }
                 sx={{
                   borderRadius: 2,
                   px: 2,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    transform: 'translateY(-1px)',
-                    transition: 'all 0.2s ease'
-                  }
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    transform: "translateY(-1px)",
+                    transition: "all 0.2s ease",
+                  },
                 }}
               >
                 {item.text}
@@ -284,11 +285,13 @@ function NavBar() {
           </Box>
 
           {/* Menú de Navegación (Tablet) */}
-          <Box sx={{ 
-            display: { xs: "none", sm: "flex", md: "none" }, 
-            flexGrow: 1,
-            gap: 0.5
-          }}>
+          <Box
+            sx={{
+              display: { xs: "none", sm: "flex", md: "none" },
+              flexGrow: 1,
+              gap: 0.5,
+            }}
+          >
             {menuItems.slice(0, 3).map((item) => (
               <Button
                 key={item.text}
@@ -298,11 +301,11 @@ function NavBar() {
                 sx={{
                   borderRadius: 2,
                   px: 1.5,
-                  minWidth: 'auto',
-                  fontSize: '0.875rem',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
+                  minWidth: "auto",
+                  fontSize: "0.875rem",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
                 }}
               >
                 {item.icon}
@@ -311,74 +314,90 @@ function NavBar() {
           </Box>
 
           {/* Área de Usuario y Carrito */}
-          <Box sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: 1,
-            ml: 'auto'
-          }}>
-            {/* Carrito con badge */}
-            <IconButton 
-              color="inherit" 
-              component={Link} 
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              ml: "auto",
+            }}
+          >
+            {/* Carrito con bolita */}
+            <IconButton
+              color="inherit"
+              component={Link}
               to="/carrito"
               sx={{
-                position: 'relative',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }
+                position: "relative",
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
+                borderRadius: 5,
+                p: 1.2,
+                mr: 1,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.25)",
+                  transform: "scale(1.05)",
+                  transition: "all 0.2s ease",
+                },
               }}
             >
               <Badge
                 badgeContent={cart.cantidadTotal}
                 color="secondary"
                 sx={{
-                  '& .MuiBadge-badge': {
-                    fontSize: '0.7rem',
-                    fontWeight: 'bold',
-                    minWidth: '20px',
-                    height: '20px'
-                  }
+                  "& .MuiBadge-badge": {
+                    fontSize: "0.7rem",
+                    fontWeight: "bold",
+                    minWidth: "20px",
+                    height: "20px",
+                    transform: "scale(1.1) translate(50%, -20%)",
+                  },
                 }}
               >
-                <ShoppingCart />
+                <ShoppingCart sx={{ fontSize: "1.7rem" }} />{" "}
+                {/* Ícono más grande */}
               </Badge>
             </IconButton>
 
             {/* Usuario Autenticado */}
             {isAuthenticated ? (
               <>
-                <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    display: { xs: "none", sm: "flex" },
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
                   <Chip
                     icon={<AccountCircle />}
                     label={`Hola, ${user?.nombre}`}
                     variant="outlined"
                     sx={{
-                      color: 'white',
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      '& .MuiChip-icon': { color: 'white' }
+                      color: "white",
+                      borderColor: "rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      "& .MuiChip-icon": { color: "white" },
                     }}
                   />
                 </Box>
-                <IconButton 
-                  color="inherit" 
+                <IconButton
+                  color="inherit"
                   onClick={handleMenuOpen}
-                  sx={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    }
+                  sx={{
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    },
                   }}
                 >
-                  <Avatar 
-                    sx={{ 
-                      width: 36, 
-                      height: 36, 
-                      backgroundColor: 'secondary.main',
-                      fontSize: '0.9rem',
-                      fontWeight: 'bold',
-                      color: 'text.primary'
+                  <Avatar
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      backgroundColor: "secondary.main",
+                      fontSize: "0.9rem",
+                      fontWeight: "bold",
+                      color: "text.primary",
                     }}
                   >
                     {getUserInitials()}
@@ -387,37 +406,37 @@ function NavBar() {
               </>
             ) : (
               // Usuario No Autenticado
-              <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-                <Button 
-                  color="inherit" 
+              <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1 }}>
+                <Button
+                  color="inherit"
                   component={Link}
                   to="/login"
                   startIcon={<Person />}
                   sx={{
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    border: "1px solid rgba(255, 255, 255, 0.3)",
                     borderRadius: 2,
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    }
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    },
                   }}
                 >
                   Ingresar
                 </Button>
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   component={Link}
                   to="/registro"
                   startIcon={<AccountCircle />}
-                  sx={{ 
-                    backgroundColor: 'secondary.main',
-                    color: 'text.primary',
+                  sx={{
+                    backgroundColor: "secondary.main",
+                    color: "text.primary",
                     borderRadius: 2,
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      backgroundColor: 'secondary.dark',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-                    }
+                    fontWeight: "bold",
+                    "&:hover": {
+                      backgroundColor: "secondary.dark",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    },
                   }}
                 >
                   Registrarse
@@ -436,23 +455,23 @@ function NavBar() {
                   mt: 1.5,
                   minWidth: 200,
                   borderRadius: 2,
-                  overflow: 'visible',
-                  '&:before': {
+                  overflow: "visible",
+                  "&:before": {
                     content: '""',
-                    display: 'block',
-                    position: 'absolute',
+                    display: "block",
+                    position: "absolute",
                     top: 0,
                     right: 14,
                     width: 10,
                     height: 10,
-                    bgcolor: 'background.paper',
-                    transform: 'translateY(-50%) rotate(45deg)',
+                    bgcolor: "background.paper",
+                    transform: "translateY(-50%) rotate(45deg)",
                     zIndex: 0,
-                  }
-                }
+                  },
+                },
               }}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
               <MenuItem onClick={handleProfile}>
                 <ListItemIcon>
@@ -480,11 +499,11 @@ function NavBar() {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", sm: "none" },
-          "& .MuiDrawer-paper": { 
-            boxSizing: "border-box", 
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
             width: 280,
             borderTopRightRadius: 16,
-            borderBottomRightRadius: 16
+            borderBottomRightRadius: 16,
           },
         }}
       >

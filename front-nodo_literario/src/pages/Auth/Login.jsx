@@ -143,7 +143,7 @@ const Login = () => {
           if (googleLoading) {
             setGoogleLoading(false);
             setError(
-              "La ventana de autenticación se cerró inesperadamente. Por favor, intenta nuevamente."
+              "La ventana de autenticación se cerró inesperadamente. Por favor, intentá nuevamente."
             );
           }
         }
