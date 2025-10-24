@@ -57,7 +57,7 @@ class AuthService {
     // Crear usuario
     const usuario = await Usuario.create({
       email,
-      password_hash,
+      passwordHash: password_hash,
       nombre,
       apellido,
       telefono,
@@ -124,7 +124,7 @@ class AuthService {
     // Verificar contraseña
     const isValidPassword = await bcrypt.compare(
       password,
-      usuario.password_hash
+      usuario.passwordHash
     );
     if (!isValidPassword) {
       throw new Error("Credenciales inválidas");
@@ -213,7 +213,7 @@ class AuthService {
     // Verificar contraseña actual
     const isValidPassword = await bcrypt.compare(
       currentPassword,
-      usuario.password_hash
+      usuario.passwordHash
     );
     if (!isValidPassword) {
       throw new Error("Contraseña actual incorrecta");
@@ -221,7 +221,7 @@ class AuthService {
 
     // Hash nueva contraseña
     const saltRounds = 12;
-    usuario.password_hash = await bcrypt.hash(newPassword, saltRounds);
+    usuario.passwordHash = await bcrypt.hash(newPassword, saltRounds);
     await usuario.save();
 
     return { message: "Contraseña actualizada exitosamente" };
