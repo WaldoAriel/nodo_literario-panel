@@ -56,10 +56,7 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-app.use((req, res, next) => {
-  console.log(`🌐 ${req.method} ${req.originalUrl}`);
-  next();
-});
+app.use((req, res, next) => next());
 
 app.use("/api", categoriaRoutes);
 app.use("/api", libroRoutes);
