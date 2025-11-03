@@ -1,4 +1,3 @@
-// auth.routes.js - MODIFICADO
 import { Router } from "express";
 import {
   register,
@@ -7,7 +6,8 @@ import {
   changePassword,
   getProfile,
   googleAuth,
-  googleCallback
+  googleCallback,
+  logout
 } from "../controllers/authControllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -17,6 +17,7 @@ const router = Router();
 router.post("/register", register);
 router.post("/login", login);
 router.post("/refresh-token", refreshToken);
+router.post('/logout', logout);
 
 // NUEVAS RUTAS OAUTH
 router.get("/google", googleAuth);

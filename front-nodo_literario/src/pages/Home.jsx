@@ -213,7 +213,11 @@ function Home() {
 
       <Grid container spacing={3} justifyContent="space-around">
         {librosDestacados.map((libro) => (
-          <Grid item key={libro.id} xs={12} sm={6} md={3}>
+          <Grid key={libro.id} 
+
+          sx={{xs:12, sm:6, md:3  }}
+          
+          >
             <LibroCard {...libro} />
           </Grid>
         ))}

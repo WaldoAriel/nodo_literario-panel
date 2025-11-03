@@ -19,6 +19,7 @@ import editorialRoutes from "./src/routes/editoriales.routes.js";
 import adminLibrosRoutes from "./src/routes/admin/libros.routes.js"; // admin
 import { createServer } from "http";
 import { Server } from "socket.io";
+import cookieParser from "cookie-parser";
 
 // rutas de autenticación
 import authRoutes from "./src/routes/auth.routes.js";
@@ -53,14 +54,12 @@ io.on("connection", (socket) => {
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(cors({ origin: "http://localhost:5173" }));
-
-// Agrega esto DESPUÉS de app.use(cors...) y ANTES de las rutas
+app.use(cookieParser());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use((req, res, next) => {
   console.log(`🌐 ${req.method} ${req.originalUrl}`);
   next();
 });
-// TEMPORAL  PARA DEBUG ****
 
 app.use("/api", categoriaRoutes);
 app.use("/api", libroRoutes);
