@@ -23,7 +23,7 @@ const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { login, loginWithGoogle } = useAuth(); // ✅ loginWithGoogle viene del contexto
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -42,8 +42,7 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate("/");
     } catch (err) {
-      console.error("Error en login:", err.message);
-
+      setError(err.message || "Error en el login");
     } finally {
       setLoading(false);
     }
@@ -54,15 +53,9 @@ const Login = () => {
     setError("");
 
     try {
-      console.log("🔐 1. Iniciando proceso OAuth...");
-
-      // Obtener URL de Google
       const response = await fetch("http://localhost:3000/api/auth/google");
       const data = await response.json();
 
-      console.log("🔐 2. URL de Google recibida");
-
-      // Crear popup con características específicas
       const width = 600;
       const height = 600;
       const left = (window.screen.width - width) / 2;
@@ -80,51 +73,29 @@ const Login = () => {
         );
       }
 
-      console.log("🔐 3. Popup abierto");
-
-      // Escuchar mensajes del popup
       const handleMessage = (event) => {
-        console.log("🔐 4. Mensaje recibido:", event.data);
-
-        // Verificar origen del mensaje
-        if (event.origin !== window.location.origin) {
-          console.log("🔐 5. Origen no permitido:", event.origin);
-          return;
-        }
+        if (event.origin !== window.location.origin) return;
 
         if (event.data.type === "OAUTH_SUCCESS") {
-          const { code } = event.data;
-          console.log("🔐 6. Código recibido del popup");
-
-          // Procesar el código
-          processOAuthCode(code);
+          processOAuthCode(event.data.code);
         } else if (event.data.type === "OAUTH_ERROR") {
-          console.error("🔐 7. Error del popup:", event.data.error);
           setError(event.data.error);
           setGoogleLoading(false);
           if (popup && !popup.closed) popup.close();
         }
       };
 
-      // Función para procesar el código OAuth
       const processOAuthCode = async (code) => {
         try {
-          console.log("🔐 8. Llamando a loginWithGoogle...");
           const result = await loginWithGoogle(code);
-          console.log("🔐 9. Resultado de loginWithGoogle:", result);
-
           if (result.success) {
-            console.log("🔐 10. Login exitoso");
             if (popup && !popup.closed) popup.close();
             window.removeEventListener("message", handleMessage);
           } else {
-            console.error("🔐 11. Error en login:", result.error);
             setError(result.error);
           }
         } catch (err) {
-          console.error("🔐 12. Error en loginWithGoogle:", err);
-          console.error("Error en login:", err.message);
-
+          setError(err.message || "Error en autenticación con Google");
         } finally {
           setGoogleLoading(false);
         }
@@ -132,14 +103,10 @@ const Login = () => {
 
       window.addEventListener("message", handleMessage);
 
-      // Verificar periódicamente si el popup se cerró sin enviar mensaje
       const popupCheck = setInterval(() => {
         if (popup.closed) {
-          console.log("🔐 13. Popup cerrado sin enviar mensaje");
           clearInterval(popupCheck);
           window.removeEventListener("message", handleMessage);
-
-          // Solo mostrar error si todavía está cargando
           if (googleLoading) {
             setGoogleLoading(false);
             setError(
@@ -149,14 +116,11 @@ const Login = () => {
         }
       }, 500);
 
-      // Limpiar intervalo después de 2 minutos
       setTimeout(() => {
         clearInterval(popupCheck);
       }, 120000);
     } catch (err) {
-      console.error("🔐 14. Error general:", err);
-      console.error("Error en login:", err.message);
-
+      setError(err.message || "Error al iniciar autenticación con Google");
       setGoogleLoading(false);
     }
   };
@@ -182,7 +146,6 @@ const Login = () => {
             </Alert>
           )}
 
-          {/* Botón de Google */}
           <GoogleAuthButton
             onClick={handleGoogleLogin}
             loading={googleLoading}
@@ -200,7 +163,6 @@ const Login = () => {
             />
           </Box>
 
-          {/* Formulario de login normal */}
           <form onSubmit={handleSubmit}>
             <TextField
               margin="normal"

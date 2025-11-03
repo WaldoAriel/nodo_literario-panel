@@ -14,6 +14,11 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import {
   Add,
@@ -26,13 +31,7 @@ import {
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 
-// =============================================
-// 1. AGREGAR ESTE NUEVO COMPONENTE ANTES DE "Carrito"
-// =============================================
 const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
-    console.log(`🔄 CartItem ${item.id_libro} se está renderizando`);
-
-  // Función para obtener la imagen del libro
   const getImagenLibro = (libro) => {
     if (!libro) return null;
     if (libro.imagenes && libro.imagenes.length > 0) {
@@ -45,7 +44,6 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
     <Card sx={{ mb: 2 }}>
       <CardContent>
         <Box display="flex" alignItems="center" gap={2}>
-          {/* Imagen del libro */}
           <CardMedia
             component="img"
             image={getImagenLibro(item.libro) || "/placeholder-book.jpg"}
@@ -58,7 +56,6 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
             }}
           />
 
-          {/* Información del libro */}
           <Box flex={1}>
             <Typography variant="h6" component="h3" fontWeight="bold">
               {item.libro?.titulo}
@@ -72,13 +69,11 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
               Stock disponible: {item.libro?.stock || 0}
             </Typography>
 
-            {/* Precio unitario */}
             <Typography variant="body1" color="primary.main" fontWeight="bold">
               ${item.precio_unitario?.toLocaleString("es-AR")}
             </Typography>
           </Box>
 
-          {/* Controles de cantidad */}
           <Box display="flex" alignItems="center" gap={1}>
             <IconButton
               onClick={() => onQuantityChange(item.id_libro, item.cantidad - 1)}
@@ -108,7 +103,6 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
             </IconButton>
           </Box>
 
-          {/* Subtotal y eliminar */}
           <Box textAlign="right" minWidth={120}>
             <Typography variant="h6" fontWeight="bold" gutterBottom>
               ${item.subtotal?.toLocaleString("es-AR")}
@@ -128,12 +122,7 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
   );
 });
 
-// =============================================
-// 2. TU COMPONENTE Carrito ORIGINAL (CON MODIFICACIONES)
-// =============================================
 function Carrito() {
-  console.log("🔄 Componente Carrito se está renderizando");
-
   const { cart, loading, removeFromCart, updateQuantity, clearCart } =
     useCart();
 
@@ -143,18 +132,12 @@ function Carrito() {
     severity: "success",
   });
 
-// DEBUG: Ver qué cambia entre renders
-  React.useEffect(() => {
-    console.log("📊 Estado del carrito actualizado:", {
-      itemsCount: cart.items.length,
-      total: cart.total,
-      cantidadTotal: cart.cantidadTotal
-    });
-  }, [cart]);
+  const [deleteDialog, setDeleteDialog] = React.useState({
+    open: false,
+    itemId: null,
+    itemTitle: "",
+  });
 
-  // =============================================
-  // 3. REEMPLAZAR LAS FUNCIONES handleQuantityChange y handleRemoveItem
-  // =============================================
   const handleQuantityChange = React.useCallback(
     async (idLibro, nuevaCantidad) => {
       const result = await updateQuantity(idLibro, nuevaCantidad);
@@ -182,23 +165,33 @@ function Carrito() {
     [updateQuantity]
   );
 
-  const handleRemoveItem = React.useCallback(
-    async (idLibro, titulo) => {
-      const result = await removeFromCart(idLibro);
-      if (result.success) {
-        setSnackbar({
-          open: true,
-          message: `"${titulo}" eliminado del carrito`,
-          severity: "info",
-        });
-      }
-    },
-    [removeFromCart]
-  );
+  const handleRemoveClick = (idLibro, titulo) => {
+    setDeleteDialog({
+      open: true,
+      itemId: idLibro,
+      itemTitle: titulo,
+    });
+  };
 
-  // =============================================
-  // 4. EL RESTO DE TUS FUNCIONES PERMANECEN IGUAL
-  // =============================================
+  const handleConfirmDelete = async () => {
+    const { itemId, itemTitle } = deleteDialog;
+    const result = await removeFromCart(itemId);
+
+    if (result.success) {
+      setSnackbar({
+        open: true,
+        message: `"${itemTitle}" eliminado del carrito`,
+        severity: "info",
+      });
+    }
+
+    setDeleteDialog({ open: false, itemId: null, itemTitle: "" });
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialog({ open: false, itemId: null, itemTitle: "" });
+  };
+
   const handleClearCart = async () => {
     const result = await clearCart();
     if (result.success) {
@@ -231,7 +224,6 @@ function Carrito() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header - TODO ESTO PERMANECE IGUAL */}
       <Box display="flex" alignItems="center" mb={4}>
         <Button
           component={Link}
@@ -256,7 +248,6 @@ function Carrito() {
       </Box>
 
       {cart.items.length === 0 ? (
-        // Carrito vacío - TODO ESTO PERMANECE IGUAL
         <Paper
           sx={{
             textAlign: "center",
@@ -283,22 +274,17 @@ function Carrito() {
           </Button>
         </Paper>
       ) : (
-        // =============================================
-        // 5. MODIFICAR SOLO ESTA PARTE - USAR CartItem EN LUGAR DEL CÓDIGO ORIGINAL
-        // =============================================
         <Box display="flex" flexDirection={{ xs: "column", md: "row" }} gap={4}>
-          {/* Lista de Items - REEMPLAZADO CON COMPONENTE OPTIMIZADO */}
           <Box flex={1}>
             {cart.items.map((item) => (
               <CartItem
                 key={item.id_libro}
                 item={item}
                 onQuantityChange={handleQuantityChange}
-                onRemove={handleRemoveItem}
+                onRemove={handleRemoveClick}
               />
             ))}
 
-            {/* Botón Vaciar Carrito */}
             <Box display="flex" justifyContent="flex-end" mt={2}>
               <Button
                 startIcon={<RemoveShoppingCart />}
@@ -311,7 +297,6 @@ function Carrito() {
             </Box>
           </Box>
 
-          {/* Resumen del Pedido - TODO ESTO PERMANECE IGUAL */}
           <Box width={{ xs: "100%", md: 300 }}>
             <Paper sx={{ p: 3, position: "sticky", top: 100 }}>
               <Typography variant="h6" gutterBottom fontWeight="bold">
@@ -367,6 +352,32 @@ function Carrito() {
           </Box>
         </Box>
       )}
+
+      {/* Diálogo de Confirmación de Eliminación */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          ¿Eliminar producto del carrito?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            ¿Estás seguro de que deseas eliminar "{deleteDialog.itemTitle}" de
+            tu carrito de compras?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Sí, Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}
