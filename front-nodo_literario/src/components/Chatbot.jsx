@@ -128,7 +128,7 @@ const Chatbot = () => {
           sx: {
             height: "70vh",
             maxHeight: "600px",
-            borderRadius: 2,
+            borderRadius: 4,
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
           },
         }}

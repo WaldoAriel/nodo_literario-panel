@@ -65,7 +65,7 @@ const NotificacionesSocket = () => {
       open={open}
       autoHideDuration={8000}
       onClose={handleClose}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
       sx={{
         mt: 6,
         "& .MuiSnackbar-root": {

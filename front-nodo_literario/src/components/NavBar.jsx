@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Menu, MenuItem, Divider, Badge, Chip } from "@mui/material";
 import {
-  AutoStories,
   Menu as MenuIcon,
   ShoppingCart,
   Person,
@@ -25,6 +24,7 @@ import {
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import LogoSVG from "../assets/logo-nodo-literario-blanco.svg";
 
 function NavBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -80,7 +80,17 @@ function NavBar() {
       {/* Header del drawer */}
       <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
         <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
-          <AutoStories sx={{ mr: 1 }} />
+          {/* 3. Ícono del Drawer Reemplazado */}
+          <Box 
+              component="img"
+              src={LogoSVG}
+              alt="Logo"
+              sx={{ 
+                  mr: 1, 
+                  height: 28, // Altura ajustada
+                  width: 'auto' 
+              }}
+          />
           Nodo Literario
         </Typography>
         {isAuthenticated && (
@@ -230,12 +240,17 @@ function NavBar() {
               mr: { sm: 4 },
             }}
           >
-            <AutoStories
-              fontSize="large"
-              sx={{
-                mr: 2,
-                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
-              }}
+            {/* 2. Ícono Principal Reemplazado */}
+            <Box 
+                component="img"
+                src={LogoSVG}
+                alt="Logo Nodo Literario"
+                sx={{
+                    mr: 2,
+                    height: 38, // Ajusta la altura del logo
+                    width: 'auto',
+                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+                }}
             />
             <Typography
               variant="h5"

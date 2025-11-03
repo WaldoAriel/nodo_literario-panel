@@ -408,6 +408,7 @@ export default function AdminLibros() {
         await libroService.updateLibro(currentLibro.id, libroData);
         showSnackbar("Libro actualizado correctamente");
       } else {
+       
         // Creación
         formData.imageFiles.forEach((file) => {
           libroData.append("imagenes", file);
@@ -483,9 +484,9 @@ export default function AdminLibros() {
               <TableCell>Portada</TableCell>
               <TableCell>Título</TableCell>
               <TableCell>Autor</TableCell>
-              <TableCell>Precio</TableCell>
-              <TableCell>Stock</TableCell>
-              <TableCell>Categoría</TableCell>
+              <TableCell align="right">Precio</TableCell>
+              <TableCell align="right">Stock</TableCell>
+              <TableCell align="center">Categoría</TableCell>
               <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -572,7 +573,7 @@ export default function AdminLibros() {
                     />
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={libro.categoria?.nombre || "Sin categoría"}
                       size="small"
@@ -842,7 +843,7 @@ export default function AdminLibros() {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
+        autoHideDuration={6000}
         onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       >
         <Alert
