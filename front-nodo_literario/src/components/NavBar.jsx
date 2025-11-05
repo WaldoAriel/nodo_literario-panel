@@ -88,7 +88,7 @@ function NavBar() {
             alt="Logo"
             sx={{
               mr: 1,
-              height: 28, // Altura ajustada
+              height: 28,
               width: "auto",
             }}
           />
@@ -242,14 +242,14 @@ function NavBar() {
               mr: { sm: 4 },
             }}
           >
-            {/* 2. Ícono Principal Reemplazado */}
+            {/* Ícono */}
             <Box
               component="img"
               src={LogoSVG}
               alt="Logo Nodo Literario"
               sx={{
                 mr: 2,
-                height: 60, // Ajusta la altura del logo
+                height: 48,
                 width: "auto",
                 filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
               }}

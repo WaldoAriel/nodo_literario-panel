@@ -1,30 +1,43 @@
+// theme.js actualizado
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#006D77', // Turquesa profundo
-      light: '#83C5BE', // Turquesa claro
-      dark: '#00474E', // Turquesa oscuro
-      contrastText: '#FFFFFF', // Texto blanco
+      main: '#006D77',
+      light: '#83C5BE',
+      dark: '#00474E',
+      contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#FFDDD2', // Coral suave
+      main: '#FFDDD2',
       light: '#FFEEE8',
       dark: '#E8C4B8',
     },
     background: {
-      default: '#EDF6F9', // Fondo blanco azulado muy claro
-      paper: '#FFFFFF', // Fondo blanco para cards
+      default: '#F8F9FA',
+      paper: '#FFFFFF',
     },
     text: {
-      primary: '#1E1E1E', // Casi negro 
-      secondary: '#006D77', // Turquesa 
+      primary: '#1E1E1E',
+      secondary: '#6C757D',
+    },
+    success: {
+      main: '#28A745',
+      light: '#E8F5E8',
+    },
+    warning: {
+      main: '#FFC107',
+      light: '#FFF8E1',
+    },
+    error: {
+      main: '#DC3545',
+      light: '#FDE8E8',
     },
   },
   typography: {
     fontFamily: [
-      '"Poppins"',
+      '"Inter"',
       '"Segoe UI"',
       'Roboto',
       '"Helvetica Neue"',
@@ -32,27 +45,47 @@ const theme = createTheme({
       'sans-serif'
     ].join(','),
     h1: {
-      fontWeight: 600,
+      fontWeight: 700,
       fontSize: '2.5rem',
     },
     h2: {
-      fontWeight: 500,
+      fontWeight: 600,
       fontSize: '2rem',
     },
     h3: {
-      fontWeight: 500,
+      fontWeight: 600,
       fontSize: '1.75rem',
     },
+    h4: {
+      fontWeight: 600,
+      fontSize: '1.5rem',
+    },
+    h5: {
+      fontWeight: 600,
+      fontSize: '1.25rem',
+    },
+    h6: {
+      fontWeight: 600,
+      fontSize: '1.1rem',
+    },
     button: {
-      textTransform: 'none', // Botones sin mayús
+      textTransform: 'none',
       fontWeight: 500,
     },
+  },
+  shape: {
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8, 
+          borderRadius: 8,
+          fontWeight: 500,
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          },
         },
       },
     },
@@ -60,7 +93,25 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0, 109, 119, 0.1)', 
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.04)',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
         },
       },
     },
