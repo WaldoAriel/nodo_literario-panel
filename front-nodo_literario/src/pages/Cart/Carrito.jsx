@@ -42,8 +42,14 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
 
   return (
     <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" gap={2}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+        {/* Layout para desktop/tablet */}
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={2}
+          sx={{ display: { xs: "none", sm: "flex" } }} // ← Oculta en móvil
+        >
           <CardMedia
             component="img"
             image={getImagenLibro(item.libro) || "/placeholder-book.jpg"}
@@ -117,6 +123,127 @@ const CartItem = React.memo(({ item, onQuantityChange, onRemove }) => {
             </Button>
           </Box>
         </Box>
+
+        {/* Layout para celus */}
+        <Box
+          sx={{ display: { xs: "block", sm: "none" } }} // ← Solo en celulares
+        >
+          {/* Fila 1: Imagen + Info básica */}
+          <Box display="flex" gap={2} alignItems="flex-start" mb={2}>
+            <CardMedia
+              component="img"
+              image={getImagenLibro(item.libro) || "/placeholder-book.jpg"}
+              alt={item.libro?.titulo}
+              sx={{
+                width: 60,
+                height: 90,
+                objectFit: "cover",
+                borderRadius: 1,
+              }}
+            />
+
+            <Box flex={1}>
+              <Typography
+                variant="h6"
+                component="h3"
+                fontWeight="bold"
+                fontSize="1rem"
+              >
+                {item.libro?.titulo}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                fontSize="0.8rem"
+              >
+                por{" "}
+                {item.libro?.autores?.map((a) => a.nombre).join(", ") ||
+                  "Autor desconocido"}
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontSize="0.75rem"
+              >
+                Stock: {item.libro?.stock || 0}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Fila 2: Precio unitario + Controles cantidad */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
+            <Typography
+              variant="body1"
+              color="primary.main"
+              fontWeight="bold"
+              fontSize="0.9rem"
+            >
+              ${item.precio_unitario?.toLocaleString("es-AR")} c/u
+            </Typography>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <IconButton
+                onClick={() =>
+                  onQuantityChange(item.id_libro, item.cantidad - 1)
+                }
+                disabled={item.cantidad <= 1}
+                size="small"
+                sx={{ p: 0.5 }}
+              >
+                <Remove fontSize="small" />
+              </IconButton>
+
+              <Typography
+                variant="h6"
+                sx={{
+                  minWidth: 30,
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {item.cantidad}
+              </Typography>
+
+              <IconButton
+                onClick={() =>
+                  onQuantityChange(item.id_libro, item.cantidad + 1)
+                }
+                disabled={item.cantidad >= (item.libro?.stock || 0)}
+                size="small"
+                sx={{ p: 0.5 }}
+              >
+                <Add fontSize="small" />
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Fila 3: Subtotal + Eliminar */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6" fontWeight="bold" fontSize="0.9rem">
+              Total: ${item.subtotal?.toLocaleString("es-AR")}
+            </Typography>
+
+            <Button
+              startIcon={<Delete />}
+              onClick={() => onRemove(item.id_libro, item.libro?.titulo)}
+              color="error"
+              size="small"
+              sx={{ minWidth: "auto", px: 1 }}
+            >
+              Eliminar
+            </Button>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );
@@ -136,6 +263,10 @@ function Carrito() {
     open: false,
     itemId: null,
     itemTitle: "",
+  });
+
+  const [clearCartDialog, setClearCartDialog] = React.useState({
+    open: false,
   });
 
   const handleQuantityChange = React.useCallback(
@@ -192,7 +323,11 @@ function Carrito() {
     setDeleteDialog({ open: false, itemId: null, itemTitle: "" });
   };
 
-  const handleClearCart = async () => {
+  const handleClearCartClick = () => {
+    setClearCartDialog({ open: true });
+  };
+
+  const handleConfirmClearCart = async () => {
     const result = await clearCart();
     if (result.success) {
       setSnackbar({
@@ -201,6 +336,11 @@ function Carrito() {
         severity: "info",
       });
     }
+    setClearCartDialog({ open: false });
+  };
+
+  const handleCancelClearCart = () => {
+    setClearCartDialog({ open: false });
   };
 
   const handleCloseSnackbar = () => {
@@ -288,7 +428,7 @@ function Carrito() {
             <Box display="flex" justifyContent="flex-end" mt={2}>
               <Button
                 startIcon={<RemoveShoppingCart />}
-                onClick={handleClearCart}
+                onClick={handleClearCartClick}
                 variant="outlined"
                 color="error"
               >
@@ -375,6 +515,31 @@ function Carrito() {
           </Button>
           <Button onClick={handleConfirmDelete} color="error" autoFocus>
             Sí, Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={clearCartDialog.open}
+        onClose={handleCancelClearCart}
+        aria-labelledby="clear-cart-dialog-title"
+        aria-describedby="clear-cart-dialog-description"
+      >
+        <DialogTitle id="clear-cart-dialog-title">
+          ¿Vaciar carrito de compras?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="clear-cart-dialog-description">
+            ¿Estás seguro de que deseas eliminar todos los productos de tu
+            carrito? Esta acción no se puede deshacer.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelClearCart} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmClearCart} color="error" autoFocus>
+            Sí, Vaciar Carrito
           </Button>
         </DialogActions>
       </Dialog>

@@ -21,6 +21,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -81,15 +82,15 @@ function NavBar() {
       <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
         <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
           {/* 3. Ícono del Drawer Reemplazado */}
-          <Box 
-              component="img"
-              src={LogoSVG}
-              alt="Logo"
-              sx={{ 
-                  mr: 1, 
-                  height: 28, // Altura ajustada
-                  width: 'auto' 
-              }}
+          <Box
+            component="img"
+            src={LogoSVG}
+            alt="Logo"
+            sx={{
+              mr: 1,
+              height: 28, // Altura ajustada
+              width: "auto",
+            }}
           />
           Nodo Literario
         </Typography>
@@ -203,14 +204,15 @@ function NavBar() {
   return (
     <>
       <AppBar
-        position="static"
+        position="sticky"
         sx={{
           backgroundColor: "#00474E",
           background: "linear-gradient(135deg, #00474E 0%, #006B76 100%)",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          zIndex: 1000,
         }}
       >
-        <Toolbar sx={{ minHeight: "70px !important" }}>
+        <Toolbar sx={{ minHeight: "100px !important" }}>
           {/* Menú Hamburguesa (Mobile) */}
           <IconButton
             color="inherit"
@@ -241,16 +243,16 @@ function NavBar() {
             }}
           >
             {/* 2. Ícono Principal Reemplazado */}
-            <Box 
-                component="img"
-                src={LogoSVG}
-                alt="Logo Nodo Literario"
-                sx={{
-                    mr: 2,
-                    height: 38, // Ajusta la altura del logo
-                    width: 'auto',
-                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
-                }}
+            <Box
+              component="img"
+              src={LogoSVG}
+              alt="Logo Nodo Literario"
+              sx={{
+                mr: 2,
+                height: 60, // Ajusta la altura del logo
+                width: "auto",
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+              }}
             />
             <Typography
               variant="h5"
@@ -270,7 +272,7 @@ function NavBar() {
           {/* Menú de Navegación (Desktop) */}
           <Box
             sx={{
-              display: { xs: "none", md: "flex" },
+              display: { xs: "none", lg: "flex" },
               flexGrow: 1,
               gap: 1,
             }}
@@ -302,7 +304,7 @@ function NavBar() {
           {/* Menú de Navegación (Tablet) */}
           <Box
             sx={{
-              display: { xs: "none", sm: "flex", md: "none" },
+              display: { xs: "none", sm: "flex", lg: "none" },
               flexGrow: 1,
               gap: 0.5,
             }}
@@ -333,52 +335,53 @@ function NavBar() {
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 5,
+              gap: { xs: 2, sm: 3, md: 5 },
               ml: "auto",
             }}
           >
-            {/* Carrito con bolita */}
-            <IconButton
-              color="inherit"
-              component={Link}
-              to="/carrito"
-              sx={{
-                position: "relative",
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
-                borderRadius: 5,
-                p: 1.2,
-                mr: 1,
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.25)",
-                  transform: "scale(1.05)",
-                  transition: "all 0.2s ease",
-                },
-              }}
-            >
-              <Badge
-                badgeContent={cart.cantidadTotal}
-                color="secondary"
+            <Tooltip title="Ver carrito" arrow>
+              <IconButton
+                color="inherit"
+                component={Link}
+                to="/carrito"
                 sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: "0.7rem",
-                    fontWeight: "bold",
-                    minWidth: "20px",
-                    height: "20px",
-                    transform: "scale(1.1) translate(50%, -20%)",
+                  position: "relative",
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  borderRadius: 2,
+                  p: 1.2,
+                  mr: 1,
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    borderRadius: 10,
+                    transform: "scale(1.05)",
+                    transition: "all 0.2s ease",
                   },
                 }}
               >
-                <ShoppingCart sx={{ fontSize: "1.7rem" }} />{" "}
-                {/* Ícono más grande */}
-              </Badge>
-            </IconButton>
+                <Badge
+                  badgeContent={cart.cantidadTotal}
+                  color="secondary"
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      fontSize: "0.7rem",
+                      fontWeight: "bold",
+                      minWidth: "20px",
+                      height: "20px",
+                      transform: "scale(1.1) translate(50%, -20%)",
+                    },
+                  }}
+                >
+                  <ShoppingCart sx={{ fontSize: "1.7rem" }} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
 
             {/* Usuario Autenticado */}
             {isAuthenticated ? (
               <>
                 <Box
                   sx={{
-                    display: { xs: "none", sm: "flex" },
+                    display: { xs: "none", md: "flex" },
                     alignItems: "center",
                     gap: 1,
                   }}
@@ -421,41 +424,80 @@ function NavBar() {
               </>
             ) : (
               // Usuario No Autenticado
-              <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1 }}>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/login"
-                  startIcon={<Person />}
-                  sx={{
-                    border: "1px solid rgba(255, 255, 255, 0.3)",
-                    borderRadius: 2,
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.1)",
-                    },
-                  }}
-                >
-                  Ingresar
-                </Button>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/registro"
-                  startIcon={<AccountCircle />}
-                  sx={{
-                    backgroundColor: "secondary.main",
-                    color: "text.primary",
-                    borderRadius: 2,
-                    fontWeight: "bold",
-                    "&:hover": {
-                      backgroundColor: "secondary.dark",
-                      transform: "translateY(-1px)",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                    },
-                  }}
-                >
-                  Registrarse
-                </Button>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {/* Versión completa (md en adelante) */}
+                <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+                  <Button
+                    color="inherit"
+                    component={Link}
+                    to="/login"
+                    startIcon={<Person />}
+                    sx={{
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      borderRadius: 2,
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      },
+                    }}
+                  >
+                    Ingresar
+                  </Button>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/registro"
+                    startIcon={<AccountCircle />}
+                    sx={{
+                      backgroundColor: "secondary.main",
+                      color: "text.primary",
+                      borderRadius: 2,
+                      fontWeight: "bold",
+                      "&:hover": {
+                        backgroundColor: "secondary.dark",
+                        transform: "translateY(-1px)",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    Registrarse
+                  </Button>
+                </Box>
+
+                {/* Versión compacta para tablets (600px - 900px) */}
+                <Box sx={{ display: { xs: "flex", md: "none" }, gap: 0.5 }}>
+                  <Tooltip title="Ingresar" arrow>
+                    <IconButton
+                      color="inherit"
+                      component={Link}
+                      to="/login"
+                      sx={{
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        },
+                      }}
+                    >
+                      <Person />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title="Registrarse" arrow>
+                    <IconButton
+                      color="inherit"
+                      component={Link}
+                      to="/registro"
+                      sx={{
+                        backgroundColor: "secondary.main",
+                        color: "text.primary",
+                        "&:hover": {
+                          backgroundColor: "secondary.dark",
+                        },
+                      }}
+                    >
+                      <AccountCircle />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </Box>
             )}
 

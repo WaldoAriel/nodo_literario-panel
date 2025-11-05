@@ -103,7 +103,7 @@ function Home() {
             left: 0,
             right: 0,
             height: "4px",
-            background: (theme) => theme.palette.secondary.main,
+            background: (theme) => theme.palette.primary.main,
           },
         }}
       >
