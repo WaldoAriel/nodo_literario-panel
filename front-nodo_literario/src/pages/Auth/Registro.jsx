@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Container,
   Paper,
@@ -9,45 +9,43 @@ import {
   Link,
   Alert,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
-} from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+} from "@mui/material";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function Registro() {
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    password: '',
-    confirmPassword: '',
-    tipo_cliente: 'regular'
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: "",
+    password: "",
+    confirmPassword: "",
+    tipo_cliente: "regular",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  const { register } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError("Las contraseñas no coinciden");
       return false;
     }
     if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError("La contraseña debe tener al menos 6 caracteres");
       return false;
     }
     return true;
@@ -55,25 +53,102 @@ export default function Registro() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const { confirmPassword, ...userData } = formData;
       const result = await register(userData);
-      
+
       if (result.success) {
-        navigate('/'); // Redirigir al home después del registro exitoso
+        navigate("/");
       } else {
         setError(result.error);
       }
     } catch (err) {
-      setError('Error inesperado al registrar usuario');
+      setError("Error inesperado al registrar usuario");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/google");
+      const data = await response.json();
+
+      const width = 600;
+      const height = 600;
+      const left = (window.screen.width - width) / 2;
+      const top = (window.screen.height - height) / 2;
+
+      const popup = window.open(
+        data.authUrl,
+        "Google Login",
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      );
+
+      if (!popup) {
+        throw new Error(
+          "No se pudo abrir la ventana emergente. Por favor, permite ventanas emergentes para este sitio."
+        );
+      }
+
+      const handleMessage = (event) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data.type === "OAUTH_SUCCESS") {
+          processOAuthCode(event.data.code);
+        } else if (event.data.type === "OAUTH_ERROR") {
+          setError(event.data.error);
+          setGoogleLoading(false);
+          if (popup && !popup.closed) popup.close();
+        }
+      };
+
+      const processOAuthCode = async (code) => {
+        try {
+          const result = await loginWithGoogle(code);
+          if (result.success) {
+            if (popup && !popup.closed) popup.close();
+            window.removeEventListener("message", handleMessage);
+          } else {
+            setError(result.error);
+          }
+        } catch (err) {
+          setError(err.message || "Error en autenticación con Google");
+        } finally {
+          setGoogleLoading(false);
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      const popupCheck = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(popupCheck);
+          window.removeEventListener("message", handleMessage);
+          if (googleLoading) {
+            setGoogleLoading(false);
+            setError(
+              "La ventana de autenticación se cerró inesperadamente. Por favor, intentá nuevamente."
+            );
+          }
+        }
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(popupCheck);
+      }, 120000);
+    } catch (err) {
+      setError(err.message || "Error al iniciar autenticación con Google");
+      setGoogleLoading(false);
     }
   };
 
@@ -81,57 +156,42 @@ export default function Registro() {
     <Container component="main" maxWidth="sm">
       <Box
         sx={{
-          marginTop: 4,
-          marginBottom: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
-          {/* Icono o logo */}
-          <Box
-            sx={{
-              backgroundColor: 'primary.main',
-              borderRadius: '50%',
-              width: 60,
-              height: 60,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mb: 2
-            }}
-          >
-            <Typography variant="h5" color="white" fontWeight="bold">
-              NL
-            </Typography>
-          </Box>
-
-          <Typography component="h1" variant="h4" color="primary" gutterBottom>
+        <Paper elevation={3} sx={{ padding: 4, width: "100%" }}>
+          <Typography component="h1" variant="h4" align="center" gutterBottom>
             Crear Cuenta
           </Typography>
 
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Únete a la comunidad de Nodo Literario
-          </Typography>
-
           {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <GoogleAuthButton
+            onClick={handleGoogleLogin}
+            loading={googleLoading}
+          />
+
+          <Box sx={{ display: "flex", alignItems: "center", my: 2 }}>
+            <Box
+              sx={{ flexGrow: 1, height: "1px", backgroundColor: "grey.300" }}
+            />
+            <Typography variant="body2" sx={{ mx: 2, color: "grey.600" }}>
+              o
+            </Typography>
+            <Box
+              sx={{ flexGrow: 1, height: "1px", backgroundColor: "grey.300" }}
+            />
+          </Box>
+
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
               <TextField
                 required
                 fullWidth
@@ -180,23 +240,6 @@ export default function Registro() {
               disabled={loading}
             />
 
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="tipo-cliente-label">Tipo de Cliente</InputLabel>
-              <Select
-                labelId="tipo-cliente-label"
-                id="tipo_cliente"
-                name="tipo_cliente"
-                value={formData.tipo_cliente}
-                label="Tipo de Cliente"
-                onChange={handleChange}
-                disabled={loading}
-              >
-                <MenuItem value="regular">Regular</MenuItem>
-                <MenuItem value="premium">Premium</MenuItem>
-                <MenuItem value="vip">VIP</MenuItem>
-              </Select>
-            </FormControl>
-
             <TextField
               margin="normal"
               required
@@ -229,22 +272,17 @@ export default function Registro() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
+              sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : 'Crear Cuenta'}
+              {loading ? <CircularProgress size={24} /> : "Crear Cuenta"}
             </Button>
-            
-            <Box sx={{ textAlign: 'center' }}>
-              <Link 
-                component={RouterLink} 
-                to="/login" 
-                variant="body2"
-                sx={{ color: 'primary.main' }}
-              >
-                ¿Ya tienes una cuenta? Inicia sesión aquí
-              </Link>
-            </Box>
+          </form>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Link component={RouterLink} to="/login" variant="body2">
+              ¿Ya tienes cuenta? Inicia sesión
+            </Link>
           </Box>
         </Paper>
       </Box>

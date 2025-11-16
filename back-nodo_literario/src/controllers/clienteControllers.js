@@ -1,10 +1,29 @@
-import { Cliente } from "../models/index.js";
+import { Cliente, Usuario } from "../models/index.js";
 
 // Obtener todos los clientes activos
 const getAllClientes = async (req, res) => {
   try {
-    const clientes = await Cliente.findAll();
-    res.json(clientes);
+    const clientes = await Cliente.findAll({
+      include: [{
+        model: Usuario,
+        as: 'usuario',
+        attributes: ['nombre', 'apellido', 'email', 'telefono']
+      }]
+    });
+    
+    // Transformar la respuesta para mantener compatibilidad
+    const clientesTransformados = clientes.map(cliente => ({
+      id: cliente.id,
+      id_usuario: cliente.id_usuario,
+      nombre: cliente.usuario.nombre,
+      apellido: cliente.usuario.apellido,
+      email: cliente.usuario.email,
+      telefono: cliente.usuario.telefono,
+      fecha_registro: cliente.fecha_registro,
+      tipo_cliente: cliente.tipo_cliente
+    }));
+    
+    res.json(clientesTransformados);
   } catch (error) {
     console.error("❌ Error al obtener clientes:", error);
     res.status(500).json({ error: "Error al obtener los clientes" });
@@ -15,13 +34,31 @@ const getAllClientes = async (req, res) => {
 const getClienteById = async (req, res) => {
   try {
     const { id } = req.params;
-    const cliente = await Cliente.findByPk(id);
+    const cliente = await Cliente.findByPk(id, {
+      include: [{
+        model: Usuario,
+        as: 'usuario',
+        attributes: ['nombre', 'apellido', 'email', 'telefono']
+      }]
+    });
 
     if (!cliente) {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }
 
-    res.json(cliente);
+    // Transformar respuesta
+    const clienteTransformado = {
+      id: cliente.id,
+      id_usuario: cliente.id_usuario,
+      nombre: cliente.usuario.nombre,
+      apellido: cliente.usuario.apellido,
+      email: cliente.usuario.email,
+      telefono: cliente.usuario.telefono,
+      fecha_registro: cliente.fecha_registro,
+      tipo_cliente: cliente.tipo_cliente
+    };
+
+    res.json(clienteTransformado);
   } catch (error) {
     console.error("❌ Error al obtener cliente por ID:", error);
     res.status(500).json({ error: "Error al obtener el cliente" });
@@ -31,22 +68,9 @@ const getClienteById = async (req, res) => {
 // Crear un nuevo cliente
 const createCliente = async (req, res) => {
   try {
-    const { nombre, apellido, email, telefono } = req.body;
-
-    if (!nombre || !apellido || !email) {
-      return res.status(400).json({
-        error: "Los campos nombre, apellido y email son obligatorios",
-      });
-    }
-
-    const nuevoCliente = await Cliente.create({
-      nombre,
-      apellido,
-      email,
-      telefono,
+    return res.status(400).json({ 
+      error: "Los clientes se crean mediante el sistema de registro de usuarios" 
     });
-
-    res.status(201).json(nuevoCliente);
   } catch (error) {
     console.error("❌ Error al crear cliente:", error);
     res.status(500).json({ error: "Error al crear el cliente" });
@@ -59,44 +83,64 @@ const updateCliente = async (req, res) => {
     const { id } = req.params;
     const { nombre, apellido, email, telefono } = req.body;
 
-    const cliente = await Cliente.findByPk(id);
+    const cliente = await Cliente.findByPk(id, {
+      include: [{
+        model: Usuario,
+        as: 'usuario'
+      }]
+    });
 
     if (!cliente) {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }
 
-    if (nombre !== undefined) cliente.nombre = nombre;
-    if (apellido !== undefined) cliente.apellido = apellido;
-    if (email !== undefined) cliente.email = email;
-    if (telefono !== undefined) cliente.telefono = telefono;
+    // Actualizar en la tabla USUARIO
+    if (nombre !== undefined) cliente.usuario.nombre = nombre;
+    if (apellido !== undefined) cliente.usuario.apellido = apellido;
+    if (email !== undefined) cliente.usuario.email = email;
+    if (telefono !== undefined) cliente.usuario.telefono = telefono;
 
-    await cliente.save();
+    await cliente.usuario.save();
 
-    res.json(cliente);
+    // Devolver datos
+    const clienteActualizado = {
+      id: cliente.id,
+      id_usuario: cliente.id_usuario,
+      nombre: cliente.usuario.nombre,
+      apellido: cliente.usuario.apellido,
+      email: cliente.usuario.email,
+      telefono: cliente.usuario.telefono,
+      fecha_registro: cliente.fecha_registro,
+      tipo_cliente: cliente.tipo_cliente
+    };
+
+    res.json(clienteActualizado);
   } catch (error) {
     console.error("❌ Error al actualizar cliente:", error);
     res.status(500).json({ error: "Error al actualizar el cliente" });
   }
 };
 
-// Eliminar cliente (eliminación lógica o física)
+// Eliminar cliente 
 const deleteCliente = async (req, res) => {
   try {
     const { id } = req.params;
-    const cliente = await Cliente.findByPk(id);
+    const cliente = await Cliente.findByPk(id, {
+      include: [{
+        model: Usuario,
+        as: 'usuario'
+      }]
+    });
 
     if (!cliente) {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }
 
-    // Eliminación lógica (si usas campo como `activo`)
-    // cliente.activo = false;
-    // await cliente.save();
+    // Eliminación lógica de USUARIO
+    cliente.usuario.activo = false;
+    await cliente.usuario.save();
 
-    // Eliminación física (por ahora lo dejamos así)
-    await cliente.destroy();
-
-    res.json({ message: "Cliente eliminado correctamente" });
+    res.json({ message: "Cliente desactivado correctamente" });
   } catch (error) {
     console.error("❌ Error al eliminar cliente:", error);
     res.status(500).json({ error: "Error al eliminar el cliente" });

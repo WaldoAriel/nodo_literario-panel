@@ -101,10 +101,6 @@ const googleCallback = async (req, res) => {
 
         await Cliente.create({
           id_usuario: usuario.id,
-          nombre: nombre,
-          apellido: apellido,
-          email: email,
-          telefono: null,
           fecha_registro: new Date(),
           tipo_cliente: "regular",
         });
@@ -125,6 +121,8 @@ const googleCallback = async (req, res) => {
     const tokensResponse = authService.generateTokens(tokenPayload);
     setAuthCookies(res, tokensResponse);
 
+    
+
     res.json({
       message: "Autenticación con Google exitosa",
       usuario: {
@@ -140,13 +138,19 @@ const googleCallback = async (req, res) => {
       rol: "cliente",
     });
   } catch (error) {
+    console.error("🔥 ERROR DETALLADO en googleCallback:", error);
+    console.error("🔥 Stack trace:", error.stack);
+
     if (error.message.includes("invalid_grant")) {
       return res
         .status(400)
         .json({ error: "Código de autorización inválido o expirado" });
     }
 
-    res.status(500).json({ error: "Error en autenticación con Google" });
+    res.status(500).json({
+      error: "Error en autenticación con Google",
+      details: error.message, // ← Agrega esto temporalmente
+    });
   }
 };
 
@@ -154,6 +158,8 @@ const register = async (req, res) => {
   try {
     const { email, password, nombre, apellido, telefono, tipo_cliente } =
       req.body;
+
+    console.log("📝 Intentando registrar usuario:", { email, nombre });
 
     if (!email || !password || !nombre) {
       return res
@@ -175,13 +181,24 @@ const register = async (req, res) => {
       telefono,
       tipo_cliente,
     });
+    
+    console.log("✅ Registro exitoso en authService, configurando cookies...");
+    
     setAuthCookies(res, result.tokens);
+
+    console.log("✅ Cookies configuradas, enviando respuesta...");
 
     res.status(201).json({
       message: "Usuario registrado exitosamente",
       usuario: result.usuario,
     });
+
+    console.log("✅ Respuesta enviada al frontend");
+
   } catch (error) {
+    console.error("🔥 ERROR en register controller:", error);
+    console.error("🔥 Stack trace:", error.stack);
+    
     if (error.message === "El email ya está registrado") {
       return res.status(409).json({ error: error.message });
     }

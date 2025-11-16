@@ -14,22 +14,6 @@ const Cliente = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    nombre: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    apellido: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    telefono: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
     fecha_registro: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
