@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import { Box, Typography, CircularProgress, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";

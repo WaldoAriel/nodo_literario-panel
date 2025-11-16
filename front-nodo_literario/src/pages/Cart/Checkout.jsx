@@ -1,3 +1,5 @@
+// OJO! COMPONENTE SIMULADO.
+
 import React, { useState } from 'react';
 import {
   Container,

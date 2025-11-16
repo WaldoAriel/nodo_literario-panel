@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   login as loginService,
@@ -8,13 +8,6 @@ import {
 } from "../services/authService";
 
 const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context)
-    throw new Error("useAuth debe ser usado dentro de un AuthProvider");
-  return context;
-};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -31,7 +24,7 @@ export const AuthProvider = ({ children }) => {
       const profile = await getProfile();
       setUser(profile.usuario);
     } catch (error) {
-      console.error('Error en checkAuthStatus:', error);
+      console.error("Error en checkAuthStatus:", error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -74,6 +67,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (code) => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/auth/google/callback",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ code }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return handleSuccessfulLogin(data);
+      } else {
+        return {
+          success: false,
+          error: data.error || "Error en autenticación con Google",
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || "Error de conexión con Google",
+      };
+    }
+  };
+
   const logout = async () => {
     try {
       await fetch("http://localhost:3000/api/auth/logout", {
@@ -111,6 +136,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     changePassword,
+    loginWithGoogle
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

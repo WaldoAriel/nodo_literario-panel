@@ -72,7 +72,7 @@ function Footer() {
       <Container maxWidth="lg">
         <Grid container spacing={4} alignItems="flex-start">
           {/* Logo y contacto - Más compacto */}
-          <Grid item xs={12} md={4}>
+          <Grid sx={{ xs: 12, md: 4 }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
               <Box
                 component="img"
@@ -172,7 +172,7 @@ function Footer() {
           </Grid>
 
           {/* Enlaces de navegación - Más compactos */}
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
             <Typography
               variant="h6"
               gutterBottom
@@ -238,7 +238,7 @@ function Footer() {
           </Grid>
 
           {/* Redes sociales y acción principal */}
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
             <Typography
               variant="h6"
               gutterBottom
@@ -363,6 +363,7 @@ function Footer() {
           }}
         >
           <Typography
+            component="div"
             variant="body2"
             sx={{
               opacity: 0.8,

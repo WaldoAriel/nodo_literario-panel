@@ -23,7 +23,7 @@ import {
   ListItemText,
   Tooltip,
 } from "@mui/material";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../context/CartContext";
 import LogoSVG from "../assets/logo-nodo-literario-blanco.svg";
 
@@ -75,13 +75,13 @@ function NavBar() {
     );
   };
 
-  // Drawer para móviles
+  // Drawer para celus
   const drawer = (
     <Box sx={{ width: 280 }} onClick={handleDrawerToggle}>
       {/* Header del drawer */}
       <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
         <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
-          {/* 3. Ícono del Drawer Reemplazado */}
+          {/* Ícono del Drawer */}
           <Box
             component="img"
             src={LogoSVG}
@@ -213,7 +213,7 @@ function NavBar() {
         }}
       >
         <Toolbar sx={{ minHeight: "100px !important" }}>
-          {/* Menú Hamburguesa (Mobile) */}
+          {/* Menú Hamburguesa */}
           <IconButton
             color="inherit"
             edge="start"

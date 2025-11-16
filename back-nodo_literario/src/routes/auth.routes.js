@@ -7,7 +7,7 @@ import {
   getProfile,
   googleAuth,
   googleCallback,
-  logout
+  logout,
 } from "../controllers/authControllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -17,7 +17,7 @@ const router = Router();
 router.post("/register", register);
 router.post("/login", login);
 router.post("/refresh-token", refreshToken);
-router.post('/logout', logout);
+router.post("/logout", logout);
 
 // NUEVAS RUTAS OAUTH
 router.get("/google", googleAuth);
