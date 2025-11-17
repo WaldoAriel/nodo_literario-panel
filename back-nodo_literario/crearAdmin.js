@@ -51,11 +51,11 @@ const crearAdmin = async () => {
       rol: "superadmin",                            // rol admin
     });
 
-    console.log("Administrador creado, ID:", administrador.id);
+    console.log("Administrador creado, ID:", administrador.id); 
     console.log("Usuario administrador creado exitosamente!");
-    console.log("Email: admin@nodoliterario.com");
-    console.log("Password: admin123");
-    console.log("Rol: superadmin");
+    console.log("Email: admin@nodoliterario.com");  // repetir mail
+    console.log("Password: admin123");              // repetir pass
+    console.log("Rol: superadmin");                 // repetir rol
 
     process.exit(0);
   } catch (error) {
