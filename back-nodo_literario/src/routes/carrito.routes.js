@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-router.get("/", getCarrito);           // GET /api/carrito
+router.get("/", getCarrito);         // GET /api/carrito
 router.post("/", createCarrito);       // POST /api/carrito
 router.post("/agregar", addItemToCarrito);     // POST /api/carrito/agregar
 

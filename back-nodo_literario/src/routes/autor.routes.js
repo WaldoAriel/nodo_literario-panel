@@ -5,7 +5,7 @@ import {
   createAutor,
   updateAutor,
   deleteAutor,
-} from "../controllers/autorControllers.js"; // Importa las funciones del controlador
+} from "../controllers/autorControllers.js"; 
 
 const router = Router();
 

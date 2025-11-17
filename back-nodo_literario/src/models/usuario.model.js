@@ -20,7 +20,7 @@ const Usuario = sequelize.define(
     passwordHash: {
       type: DataTypes.TEXT,
       allowNull: true,
-      field: "password_hash" // Mapeo explícito
+      field: "password_hash"
     },
     nombre: {
       type: DataTypes.STRING(100),
