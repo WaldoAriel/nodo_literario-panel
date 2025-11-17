@@ -36,8 +36,6 @@ class AuthService {
         tipo_cliente = "regular",
       } = userData;
 
-      console.log("📝 Intentando registrar usuario:", { email, nombre });
-      
       const existingUser = await Usuario.findOne({ where: { email } });
       if (existingUser) throw new Error("El email ya está registrado");
 
@@ -50,16 +48,12 @@ class AuthService {
         telefono,
       });
 
-      console.log("✅ Usuario creado, ID:", usuario.id);
-      
       const cliente = await Cliente.create({
         id_usuario: usuario.id,
         fecha_registro: new Date(),
         tipo_cliente: "regular",
       });
 
-      console.log("✅ Cliente creado, ID:", cliente.id);
-      
       const payload = {
         userId: usuario.id,
         clienteId: cliente.id,
@@ -68,7 +62,6 @@ class AuthService {
       };
       const tokens = this.generateTokens(payload);
 
-      // ✅ RETURN QUE FALTABA
       return {
         usuario: {
           id: usuario.id,
@@ -78,9 +71,8 @@ class AuthService {
         },
         tokens,
       };
-
     } catch (error) {
-      console.error("🔥 ERROR en register:", error);
+      console.error("Error en registro:", error);
       throw error;
     }
   }

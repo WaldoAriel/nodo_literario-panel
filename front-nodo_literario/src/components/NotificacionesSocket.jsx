@@ -16,7 +16,7 @@ const NotificacionesSocket = () => {
   // Función para reproducir "pop"
   const playNotificationSound = () => {
     try {
-      const audio = new Audio("/sounds/pop-1.mp3");
+      const audio = new Audio("/sounds/cortazar.mp3");
       audio.volume = 0.4;
       audio.play().catch(error => {
         // Error silencioso - algunos navegadores bloquean autoplay

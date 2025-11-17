@@ -82,7 +82,7 @@ app.get("/", (req, res) => {
 async function startServer() {
   try {
     await sequelize.authenticate();
-    console.log("✅ Conexión a la base de datos establecida correctamente.");
+    ("✅ Conexión a la base de datos establecida correctamente.");
 
     await sequelize.sync({ force: false });
 

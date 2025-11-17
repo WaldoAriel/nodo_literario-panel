@@ -1,6 +1,6 @@
 import { Cliente, Usuario } from "../models/index.js";
 
-// Obtener todos los clientes activos
+// Trae todos los clientes activos
 const getAllClientes = async (req, res) => {
   try {
     const clientes = await Cliente.findAll({
@@ -11,7 +11,7 @@ const getAllClientes = async (req, res) => {
       }]
     });
     
-    // Transformar la respuesta para mantener compatibilidad
+    // Transforma la respuesta p/ mantener compatibilidad
     const clientesTransformados = clientes.map(cliente => ({
       id: cliente.id,
       id_usuario: cliente.id_usuario,
@@ -30,7 +30,7 @@ const getAllClientes = async (req, res) => {
   }
 };
 
-// Obtener cliente por ID
+// Trae cliente por ID
 const getClienteById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -46,7 +46,7 @@ const getClienteById = async (req, res) => {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }
 
-    // Transformar respuesta
+    // Transforma respuesta
     const clienteTransformado = {
       id: cliente.id,
       id_usuario: cliente.id_usuario,
@@ -65,7 +65,7 @@ const getClienteById = async (req, res) => {
   }
 };
 
-// Crear un nuevo cliente
+// Crea un nuevo cliente
 const createCliente = async (req, res) => {
   try {
     return res.status(400).json({ 
@@ -77,7 +77,7 @@ const createCliente = async (req, res) => {
   }
 };
 
-// Actualizar cliente
+// Actualiza cliente
 const updateCliente = async (req, res) => {
   try {
     const { id } = req.params;
@@ -94,7 +94,7 @@ const updateCliente = async (req, res) => {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }
 
-    // Actualizar en la tabla USUARIO
+    // Actualiza en la tabla USUARIO
     if (nombre !== undefined) cliente.usuario.nombre = nombre;
     if (apellido !== undefined) cliente.usuario.apellido = apellido;
     if (email !== undefined) cliente.usuario.email = email;
@@ -102,7 +102,7 @@ const updateCliente = async (req, res) => {
 
     await cliente.usuario.save();
 
-    // Devolver datos
+    // Devuelve datos
     const clienteActualizado = {
       id: cliente.id,
       id_usuario: cliente.id_usuario,
@@ -121,7 +121,7 @@ const updateCliente = async (req, res) => {
   }
 };
 
-// Eliminar cliente 
+// Elimina cliente 
 const deleteCliente = async (req, res) => {
   try {
     const { id } = req.params;
