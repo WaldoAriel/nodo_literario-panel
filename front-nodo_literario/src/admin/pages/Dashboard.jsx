@@ -29,7 +29,7 @@ import {
 } from "@mui/icons-material";
 
 export default function Dashboard() {
-  // Datos de ejemplo mejorados
+  // Datos de simulados
   const stats = {
     totalLibros: 132,
     totalAutores: 45,
@@ -99,7 +99,7 @@ export default function Dashboard() {
       {/* Header del Dashboard */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold" color="primary">
-          Dashboard General
+          Dashboard General (Simulado)
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Resumen completo del estado de la biblioteca
