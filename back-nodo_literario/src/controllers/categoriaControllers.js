@@ -1,23 +1,23 @@
 import { Categoria } from "../models/index.js";
 
-// Obtener todas las categorías con paginación
+// trae todas las categorías con paginación
 const getAllCategorias = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     
-    // Convertir a números y calcular offset
+    // Convierte a números y calcula offset
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
     const offset = (pageNumber - 1) * limitNumber;
 
-    // Usar findAndCountAll para obtener datos + total count
+    // findAndCountAll trae datos + total count
     const { count, rows: categorias } = await Categoria.findAndCountAll({
       limit: limitNumber,
       offset: offset,
-      order: [['id', 'ASC']] // Ordenar por ID ascendente
+      order: [['id', 'ASC']] // Ordena por ID ascendente
     });
 
-    // Devolver respuesta paginada
+    // Respuesta paginada
     res.json({
       categorias,
       pagination: {
@@ -34,7 +34,7 @@ const getAllCategorias = async (req, res) => {
   }
 };
 
-// Obtener categoría por id
+// Trae categoría por id
 const getCategoriaById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -51,7 +51,7 @@ const getCategoriaById = async (req, res) => {
   }
 };
 
-// Crear una categoría nueva
+// Crea una categoría nueva
 const createCategoria = async (req, res) => {
   try {
     const { nombre } = req.body;
@@ -68,7 +68,7 @@ const createCategoria = async (req, res) => {
   }
 };
 
-// Actualizar categoría
+// Actualiza la categoría
 const updateCategoria = async (req, res) => {
   try {
     const { id } = req.params;
@@ -89,7 +89,7 @@ const updateCategoria = async (req, res) => {
   }
 };
 
-// Eliminar categoría
+// Elimina la categoría
 const deleteCategoria = async (req, res) => {
   try {
     const { id } = req.params;

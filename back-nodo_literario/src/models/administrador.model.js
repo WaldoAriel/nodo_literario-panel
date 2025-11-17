@@ -9,7 +9,6 @@ const Administrador = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
-      // field: "id_admin" - la columna se llama "id"
     },
     id_usuario: {
       type: DataTypes.INTEGER,

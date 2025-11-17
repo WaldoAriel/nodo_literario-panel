@@ -87,7 +87,7 @@ export default function Checkout() {
   const processPayment = async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Simular éxito/fracaso aleatorio (90% éxito)
+        // Simula éxito/fracaso aleatorio (90% éxito)
         const success = Math.random() > 0.1;
         resolve(success);
       }, 3000);
@@ -99,10 +99,10 @@ export default function Checkout() {
     const orderNum = 'ORD-' + Date.now();
     setOrderNumber(orderNum);
     
-    // Simular guardado en base de datos
+    // Simula el guardado en base de datos
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Limpiar carrito después de orden exitosa
+    // Limpia carrito después de orden exitosa
     await clearCart();
     
     return orderNum;
@@ -122,11 +122,11 @@ export default function Checkout() {
       setLoading(true);
       
       try {
-        // Simular procesamiento de pago
+        // Simula procesamiento de pago
         const paymentSuccess = await processPayment();
         
         if (paymentSuccess) {
-          // Crear orden
+          // Crea la orden
           await createOrder();
           setActiveStep(activeStep + 1);
         } else {
@@ -153,7 +153,7 @@ export default function Checkout() {
       ...shippingData,
       [field]: event.target.value
     });
-    // Limpiar error del campo cuando el usuario escribe
+    // Limpia error del campo cuando el usuario escribe
     if (errors[field]) {
       setErrors({ ...errors, [field]: '' });
     }
@@ -365,7 +365,7 @@ export default function Checkout() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
-        Finalizar Compra
+        Finalizar Compra (Simulado)
       </Typography>
       
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>

@@ -1,6 +1,6 @@
 import { Pedido, Cliente, Direccion } from "../models/index.js";
 
-// Obtener todos los pedidos (opcionalmente filtrados por cliente)
+// Trae todos los pedidos (opcionalmente filtrados por cliente)
 const getAllPedidos = async (req, res) => {
   try {
     const { id_cliente } = req.query;
@@ -34,7 +34,7 @@ const getAllPedidos = async (req, res) => {
   }
 };
 
-// Obtener pedido por ID
+// Trae pedido por ID
 const getPedidoById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -65,7 +65,7 @@ const getPedidoById = async (req, res) => {
   }
 };
 
-// Crear un nuevo pedido
+// Crea un nuevo pedido
 const createPedido = async (req, res) => {
   try {
     const { id_cliente, id_direccion, total, estado_pedido } = req.body;
@@ -90,7 +90,7 @@ const createPedido = async (req, res) => {
   }
 };
 
-// Actualizar estado del pedido
+// Actualiza estado del pedido
 const updatePedido = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,7 +115,7 @@ const updatePedido = async (req, res) => {
   }
 };
 
-// Eliminar pedido (eliminación lógica o física)
+// Elimina pedido (eliminación lógica o física)
 const deletePedido = async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,7 +126,7 @@ const deletePedido = async (req, res) => {
       return res.status(404).json({ error: "Pedido no encontrado" });
     }
 
-    // Eliminación lógica (si usas campo como `activo`)
+    // Eliminación lógica (si se usa campo como `activo`)
     // pedido.activo = false;
     // await pedido.save();
 

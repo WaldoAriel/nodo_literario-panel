@@ -1,6 +1,6 @@
 import { DetallePedido, Pedido, Libro } from "../models/index.js";
 
-// Obtener todos los detalles de pedidos (opcionalmente por pedido)
+// Trae todos los detalles de pedidos (opcionalmente por pedido)
 const getAllDetallesPedido = async (req, res) => {
   try {
     const { id_pedido } = req.query;
@@ -34,7 +34,7 @@ const getAllDetallesPedido = async (req, res) => {
   }
 };
 
-// Obtener detalle de pedido por ID
+// trae detalle de pedido por ID
 const getDetallePedidoById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -67,7 +67,7 @@ const getDetallePedidoById = async (req, res) => {
   }
 };
 
-// Crear un nuevo detalle de pedido
+// Crea un nuevo detalle de pedido
 const createDetallePedido = async (req, res) => {
   try {
     const { id_pedido, id_libro, cantidad } = req.body;
@@ -107,7 +107,7 @@ const createDetallePedido = async (req, res) => {
   }
 };
 
-// Actualizar cantidad en el detalle de pedido
+// Actualiza la cantidad en el detalle de pedido
 const updateDetallePedido = async (req, res) => {
   try {
     const { id } = req.params;
@@ -138,7 +138,7 @@ const updateDetallePedido = async (req, res) => {
   }
 };
 
-// Eliminar un detalle de pedido
+// Elimina un detalle de pedido
 const deleteDetallePedido = async (req, res) => {
   try {
     const { id } = req.params;

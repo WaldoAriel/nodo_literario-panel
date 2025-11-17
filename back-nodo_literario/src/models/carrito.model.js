@@ -13,7 +13,6 @@ const Carrito = sequelize.define(
     session_id: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      comment: "Identificador único de sesión para usuarios anónimos",
     },
     fecha_creacion: {
       type: DataTypes.DATE,
@@ -23,10 +22,6 @@ const Carrito = sequelize.define(
     id_cliente: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: "clientes",
-        key: "id",
-      },
     },
   },
   {
@@ -34,17 +29,5 @@ const Carrito = sequelize.define(
     timestamps: false,
   }
 );
-
-// sacar de acá y poner  en el index
-Carrito.associate = function(models) {
-  Carrito.hasMany(models.CarritoItem, {
-    foreignKey: 'id_carrito',
-    as: 'items'
-  });
-  Carrito.belongsTo(models.Cliente, {
-    foreignKey: 'id_cliente',
-    as: 'cliente'
-  });
-};
 
 export default Carrito;

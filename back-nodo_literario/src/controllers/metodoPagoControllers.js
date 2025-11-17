@@ -1,6 +1,6 @@
 import { MetodoPago } from "../models/index.js";
 
-// Obtener tooodos los métodos de pago
+// Trae tooodos los métodos de pago
 const getAllMetodosPago = async (req, res) => {
   try {
     const metodos = await MetodoPago.findAll();
@@ -11,7 +11,7 @@ const getAllMetodosPago = async (req, res) => {
   }
 };
 
-// Obtener método de pago por ID
+// Trae método de pago por ID
 const getMetodoPagoById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -28,7 +28,7 @@ const getMetodoPagoById = async (req, res) => {
   }
 };
 
-// Crear un nuevo método de pago
+// Crea un nuevo método de pago
 const createMetodoPago = async (req, res) => {
   try {
     const { nombre_metodo, descripcion } = req.body;
@@ -51,7 +51,7 @@ const createMetodoPago = async (req, res) => {
   }
 };
 
-// Actualizar método de pago
+// Actualiza el método de pago
 const updateMetodoPago = async (req, res) => {
   try {
     const { id } = req.params;
@@ -76,7 +76,7 @@ const updateMetodoPago = async (req, res) => {
   }
 };
 
-// Eliminar método de pago
+// Elimina el método de pago
 const deleteMetodoPago = async (req, res) => {
   try {
     const { id } = req.params;

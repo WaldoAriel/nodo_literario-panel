@@ -338,7 +338,7 @@ function DetalleLibro() {
                 : "✗ Sin stock"}
             </Typography>
 
-            {/* 👇 MOSTRAR INFORMACIÓN DEL CARRITO SI ESTÁ AGREGADO */}
+            {/* MUESTRA INFORMACIÓN DEL CARRITO SI ESTÁ AGREGADO */}
             {libroEnCarrito && (
               <Typography variant="body2" color="primary" sx={{ fontStyle: "italic" }}>
                 ✓ Ya tienes {cantidadEnCarrito} {cantidadEnCarrito === 1 ? 'unidad' : 'unidades'} en el carrito
@@ -349,7 +349,7 @@ function DetalleLibro() {
               variant="contained"
               size="large"
               disabled={libro.stock === 0}
-              onClick={handleAddToCart} // 👈 AGREGAR EL ONCLICK
+              onClick={handleAddToCart}
               sx={{
                 minWidth: "200px",
                 fontSize: "1.1rem",
@@ -362,7 +362,7 @@ function DetalleLibro() {
         </Box>
       </Box>
 
-      {/* 👇 SNACKBAR PARA MOSTRAR MENSAJES */}
+      {/* SNACKBAR PARA MOSTRAR MENSAJES */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

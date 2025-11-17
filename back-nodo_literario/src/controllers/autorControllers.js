@@ -1,6 +1,6 @@
 import { Autor } from "../models/index.js";
 
-// traer todos los autores con paginación
+// trae todos los autores con paginación
 const getAllAutores = async (req, res) => {
   try {
     const {
@@ -10,12 +10,12 @@ const getAllAutores = async (req, res) => {
       sortDirection = "asc",
     } = req.query;
 
-    // Convertir a números y calcular offset
+    // Convierte a números y calcula offset
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
     const offset = (pageNumber - 1) * limitNumber;
 
-    // recibir y aplicar los parámetros de ordenamiento
+    // recibe y aplica los parámetros de ordenamiento
     const order = [[sortBy, sortDirection.toUpperCase()]];
 
     // findAndCountAll para obtener datos + total count
@@ -40,7 +40,7 @@ const getAllAutores = async (req, res) => {
     res.status(500).json({ error: "Error al obtener los autores" });
   }
 };
-// Obtener autor por id
+// Trae autor por id
 const getAutorById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -57,7 +57,7 @@ const getAutorById = async (req, res) => {
   }
 };
 
-// Crear un autor nuevo
+// Crea un autor nuevo
 const createAutor = async (req, res) => {
   try {
     const { nombre, apellido } = req.body;
@@ -78,7 +78,7 @@ const createAutor = async (req, res) => {
   }
 };
 
-// Actualizar autor
+// Actualiza el autor
 const updateAutor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -100,7 +100,7 @@ const updateAutor = async (req, res) => {
   }
 };
 
-// Eliminar autor
+// Elimina el autor
 const deleteAutor = async (req, res) => {
   try {
     const { id } = req.params;

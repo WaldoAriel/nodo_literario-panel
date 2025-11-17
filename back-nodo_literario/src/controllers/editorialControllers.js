@@ -1,6 +1,6 @@
 import { Editorial } from "../models/index.js";
 
-// Obtener todas las editoriales con paginación
+// Trae todas las editoriales con paginación
 const getAllEditoriales = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -31,7 +31,7 @@ const getAllEditoriales = async (req, res) => {
   }
 };
 
-// Obtener editorial por id
+// Trae editorial por id
 const getEditorialById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -48,7 +48,7 @@ const getEditorialById = async (req, res) => {
   }
 };
 
-// Crear una editorial nueva
+// Crea una editorial nueva
 const createEditorial = async (req, res) => {
   try {
     const { nombre } = req.body;
@@ -65,7 +65,7 @@ const createEditorial = async (req, res) => {
   }
 };
 
-// Actualizar editorial
+// Actualiza editorial
 const updateEditorial = async (req, res) => {
   try {
     const { id } = req.params;
@@ -86,7 +86,7 @@ const updateEditorial = async (req, res) => {
   }
 };
 
-// Eliminar editorial
+// Elimina editorial
 const deleteEditorial = async (req, res) => {
   try {
     const { id } = req.params;

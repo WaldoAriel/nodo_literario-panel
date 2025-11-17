@@ -168,7 +168,7 @@ function Contacto() {
                 </Typography>
                 <Typography variant="body1">Sábados: 10:00 - 14:00</Typography>
                 <Chip
-                  label="Cerrado Domingos"
+                  label="Domingos Cerrado"
                   sx={{
                     mt: 1,
                     bgcolor: "rgba(255,255,255,0.2)",
@@ -180,7 +180,7 @@ function Contacto() {
           </Box>
         </Grid>
 
-        {/* Columna derecha - Formulario */}
+        {/* Formulario */}
         <Grid sx={{ xs: 12, md: 7 }}>
           <Paper sx={{ p: 4, borderRadius: 2 }}>
             <Typography

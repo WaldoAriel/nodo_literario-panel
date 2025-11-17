@@ -313,7 +313,7 @@ const updateLibro = async (req, res) => {
       return res.status(404).json({ error: "Libro no encontrado" });
     }
 
-    // Actualizar campos simples
+    // Actualiza campos simples
     await libro.update(
       {
         id_categoria,

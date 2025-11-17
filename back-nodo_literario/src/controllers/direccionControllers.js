@@ -1,6 +1,6 @@
 import { Direccion, Cliente } from "../models/index.js";
 
-// Obtener todas las direcciones (opcionalmente por cliente)
+// Trae todas las direcciones (opcionalmente por cliente)
 const getAllDirecciones = async (req, res) => {
   try {
     const { id_cliente } = req.query;
@@ -29,7 +29,7 @@ const getAllDirecciones = async (req, res) => {
   }
 };
 
-// Obtener dirección por ID
+// Trae dirección por ID
 const getDireccionById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -55,7 +55,7 @@ const getDireccionById = async (req, res) => {
   }
 };
 
-// Crear una nueva dirección
+// Crea una nueva dirección
 const createDireccion = async (req, res) => {
   try {
     const {
@@ -106,7 +106,7 @@ const createDireccion = async (req, res) => {
   }
 };
 
-// Actualizar dirección
+// Actualiza dirección
 const updateDireccion = async (req, res) => {
   try {
     const { id } = req.params;
@@ -158,7 +158,7 @@ const updateDireccion = async (req, res) => {
   }
 };
 
-// Eliminar dirección
+// Elimina dirección
 const deleteDireccion = async (req, res) => {
   try {
     const { id } = req.params;
